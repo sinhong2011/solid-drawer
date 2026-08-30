@@ -11,6 +11,8 @@ const here = (path: string) => fileURLToPath(new URL(path, import.meta.url));
  */
 export default defineConfig({
   plugins: solid(),
+  // release-please writes CHANGELOG.md in its own layout; leave it alone.
+  fmt: { ignorePatterns: ["CHANGELOG.md"] },
   pack: {
     entry: ["src/index.ts"],
     format: ["esm"],
