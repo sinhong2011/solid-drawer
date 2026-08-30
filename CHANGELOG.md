@@ -12,7 +12,14 @@
 
 ### Documentation
 
+* a new demo and docs site: Tailwind, a copy-paste shadcn/ui-style `drawer.tsx`, and live examples for snap points, forms, handle-only dragging, non-dismissible and always-visible sheets, nested drawers, all four edges, dynamic height, and a drawer inside a panel ([cb2f49f](https://github.com/sinhong2011/solid-drawer/commit/cb2f49fa23dd6065ca155154e95f72c9ffa015f7))
 * bring the README up to the API ([5d25963](https://github.com/sinhong2011/solid-drawer/commit/5d25963e481c9b417fd5b06eb78ba6a46512d431))
+
+### Bug Fixes
+
+* pin the page once, however many drawers are open over it: a nested drawer no longer sends the page to the top ([cb2f49f](https://github.com/sinhong2011/solid-drawer/commit/cb2f49fa23dd6065ca155154e95f72c9ffa015f7))
+* put the page back where it was instantly on close, whatever `scroll-behavior` the page sets ([cb2f49f](https://github.com/sinhong2011/solid-drawer/commit/cb2f49fa23dd6065ca155154e95f72c9ffa015f7))
+* read props inside effect callbacks untracked, so Solid 2 no longer warns `STRICT_READ_UNTRACKED` on every open ([cb2f49f](https://github.com/sinhong2011/solid-drawer/commit/cb2f49fa23dd6065ca155154e95f72c9ffa015f7))
 
 ## 0.1.0
 
