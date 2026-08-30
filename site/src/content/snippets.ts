@@ -193,7 +193,7 @@ export const resize = `const [more, setMore] = createSignal(false);
 export const dynamic = `const [view, setView] = createSignal<"options" | "key" | "remove">("options");
 
 // The primitives directly: this look has no handle and none of the edge styling.
-<Drawer.Root transitionResize onOpenChange={(open) => !open && setView("options")}>
+<Drawer.Root transitionResize onAnimationEnd={(open) => !open && setView("options")}>
   <Drawer.Trigger>Open</Drawer.Trigger>
   <Drawer.Portal>
     <Drawer.Overlay class="fixed inset-0 z-50 bg-black/50" />

@@ -404,4 +404,52 @@ describe("Drawer", () => {
     expect(content()?.getAttribute("data-drawer-direction")).toBe("right");
     expect(content()?.style.transform).toBe("translate3d(600px, 0, 0)");
   });
+
+  it("still leaves when its content changes size on the way out", async () => {
+    // jsdom has no ResizeObserver; one that is fired by hand stands in.
+    const callbacks: (() => void)[] = [];
+    class FakeResizeObserver {
+      constructor(callback: () => void) {
+        callbacks.push(callback);
+      }
+      observe() {}
+      disconnect() {}
+    }
+    const real = (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
+    Object.assign(globalThis, { ResizeObserver: FakeResizeObserver });
+    let height = CONTENT;
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+      configurable: true,
+      get() {
+        return this.hasAttribute("data-drawer-content") ? height : 0;
+      },
+    });
+    try {
+      const [open, setOpen] = createSignal(true);
+      mount(() => (
+        <Drawer.Root open={open()} onOpenChange={setOpen} transitionResize transitionDuration={10}>
+          <Drawer.Overlay />
+          <Drawer.Content />
+        </Drawer.Root>
+      ));
+      await tick();
+      expect(document.body.style.position).toBe("fixed");
+
+      // The view inside resets as the drawer closes, and the sheet gets shorter.
+      setOpen(false);
+      flush();
+      expect(content()?.getAttribute("data-transition-state")).toBe("closing");
+      height = 300;
+      for (const callback of callbacks) callback();
+      flush();
+      expect(content()?.getAttribute("data-transition-state")).toBe("closing");
+
+      await tick();
+      expect(content()).toBeNull();
+      expect(document.querySelector("[data-drawer-overlay]")).toBeNull();
+      expect(document.body.style.position).toBe("");
+    } finally {
+      Object.assign(globalThis, { ResizeObserver: real });
+    }
+  });
 });

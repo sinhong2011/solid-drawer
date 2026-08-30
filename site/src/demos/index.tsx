@@ -489,7 +489,7 @@ function Dynamic() {
     </Primitive.Close>
   );
   return (
-    <Primitive.Root transitionResize onOpenChange={(open) => !open && setView("options")}>
+    <Primitive.Root transitionResize onAnimationEnd={(open) => !open && setView("options")}>
       <Open />
       <Primitive.Portal>
         <Primitive.Overlay class="fixed inset-0 z-50 bg-black/50" />
