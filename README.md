@@ -15,7 +15,7 @@ pnpm add @sinhong2011/solid-drawer
 
 ```tsx
 import { Drawer } from "@sinhong2011/solid-drawer";
-import "@sinhong2011/solid-drawer/style.css"; // optional: the handle's look
+import "@sinhong2011/solid-drawer/style.css"; // optional: the handle, and the bleed past the edge
 
 function Sheet() {
   return (
@@ -80,28 +80,91 @@ const [point, setPoint] = createSignal<SnapPoint | null>(0.3);
 
 ## Parts
 
-- **`Root`** / **`NestedRoot`** — state. A `NestedRoot` inside another drawer's tree scales that drawer back as it opens and follows its drag.
+- **`Root`** / **`NestedRoot`** — state; every other part reads it through context. A `NestedRoot` inside another drawer's tree scales that drawer back as it opens and follows its drag.
 - **`Portal`** — into `container` or the body. Skip it for a drawer that stays inside its panel.
-- **`Overlay`** — opacity follows the drawer (solid from `fadeFromIndex`, fading below it). Position it yourself.
-- **`Content`** — `role="dialog"`, labelled by `Title`/`Description`, `touch-action: none`. Position it yourself. Sets `data-state`, `data-drawer-direction`, `data-dragging`, `data-transitioning`, `data-transition-state`, and `--snap-point-height` / `--drawer-translate`.
-- **`Handle`** — a 44px tap target; a tap goes to the next snap point (or closes from the last), `preventCycle` turns that off.
-- **`Trigger`**, **`Close`**, **`Title`**, **`Description`** — take `as` to render as something else.
+- **`Overlay`** — opacity follows the drawer (solid from `fadeFromIndex`, fading below it). Position it yourself; `style` merges under the opacity.
+- **`Content`** — `role="dialog"`, `aria-modal` when modal, labelled by `Title`/`Description`, `touch-action: none`. Position it yourself; `style` merges under the drawer's own `transform`/`transition`, and `ref` is a callback.
+- **`Handle`** — a 44px tap target whatever its size; a tap goes to the next snap point (or closes from the last), `preventCycle` turns that off. Under `handleOnly` it is the only thing that starts a drag.
+- **`Trigger`** — toggles the drawer, with `aria-haspopup`, `aria-expanded` and `aria-controls`. **`Close`** closes it, even one that is not `dismissible`. Both are a `button` unless given `as`.
+- **`Title`**, **`Description`** — an `h2` and a `p` unless given `as`; register themselves as the dialog's label and description. Pass `id` to use your own.
 
 Anything inside the content that scrolls should carry `touch-action: pan-y` (or `pan-x` for a side drawer); mark things that must never start a drag with `data-drawer-no-drag`.
 
+## Styling
+
+Nothing is styled but the movement. Hook selectors onto the data attributes:
+
+| Part                   | Attributes                                                                                                                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Content`              | `data-drawer-content`, `data-state="open" \| "closed"`, `data-drawer-direction`, `data-drawer-snap-points` (present when there are any), `data-dragging`, `data-transitioning`, `data-transition-state` |
+| `Overlay`              | `data-drawer-overlay`, `data-state`, `data-drawer-direction`                                                                                                                                            |
+| `Handle`               | `data-drawer-handle`, `data-drawer-direction`; the hit area inside is `data-drawer-handle-hitarea`                                                                                                      |
+| `Trigger`, `Close`     | `data-drawer-trigger` + `data-state`, `data-drawer-close`                                                                                                                                               |
+| `Title`, `Description` | `data-drawer-title`, `data-drawer-description`                                                                                                                                                          |
+
+`data-transition-state` is `"opening"`, `"closing"`, `"snapping"` or `"resizing"` while something is moving, and absent at rest.
+
+`Content` also carries two custom properties: `--drawer-translate`, its offset from fully open in pixels, and `--snap-point-height`, how much of it the active snap point shows — so `height: var(--snap-point-height)` on a scroller inside makes the visible part the scrolling part.
+
+`style.css` is optional and small: the handle's look (light and dark), its tap target, `will-change: transform` on the content, and a `::after` that carries the content's background on past its far edge, so pulling a drawer beyond open shows more drawer and not the page behind it. A drawer on a solid background wants that last part even if the handle is styled by hand.
+
 ## Headless
 
-```tsx
-import { createDrawer, useDrawer } from "@sinhong2011/solid-drawer";
+`useDrawer()` inside any part returns the drawer's whole state, the same object the parts are built on:
 
-const drawer = useDrawer(); // inside any part
-drawer.openPercentage();
+```tsx
+import { useDrawer } from "@sinhong2011/solid-drawer";
+
+const drawer = useDrawer();
+
+// state
+drawer.open();
+drawer.setOpen(true);
+drawer.close(); // close() is refused when not dismissible
+drawer.mounted(); // true through the closing animation, for exit styling
+drawer.activeSnapPoint();
+drawer.setActiveSnapPoint("480px");
+drawer.activeSnapPointIndex();
+drawer.cycleSnapPoints(); // what a tap on the handle does
+drawer.snapPoints();
+drawer.snapPointsOffset(); // each point as the drawer's translate at rest there
+
+// motion
 drawer.isDragging();
+drawer.isTransitioning();
 drawer.transitionState();
-drawer.translate();
+drawer.translate(); // px from fully open, 0 when open
+drawer.openPercentage(); // 0..1, past 1 when pulled beyond open
+drawer.overlayOpacity();
+
+// for parts of your own
+drawer.contentTransform();
+drawer.contentTransition();
+drawer.contentSize();
+drawer.contentEl();
+drawer.setContentEl(el);
+drawer.container();
+drawer.onPress(event, fromHandle); // start of a possible drag
+drawer.onTransitionEnd(event); // how a settle is known to be over
+drawer.contentId;
+drawer.titleId();
+drawer.registerTitle(id); // and the same for the description
 ```
 
-`createDrawer(props)` is the whole thing without elements, for building your own parts on.
+Everything is a Solid accessor, so it can be read in JSX and effects.
+
+`createDrawer(props, parent?)` is the whole thing without elements — everything `Root` provides, as a primitive for building parts of your own. `parent` is another drawer's context for nesting; put the result in `DrawerContext` so the stock parts can find it:
+
+```tsx
+import { createDrawer, DrawerContext, Drawer } from "@sinhong2011/solid-drawer";
+
+function MyRoot(props: DrawerRootProps) {
+  const drawer = createDrawer(props);
+  return <DrawerContext value={drawer}>{props.children}</DrawerContext>;
+}
+```
+
+The pieces the drawer is made of are exported for the same purpose: `resolveSnapPoint`, `snapPointOffsets`, `nearestSnapIndex`, `shouldDrag`, `defaultDampFunction`, and the defaults `CLOSE_THRESHOLD`, `VELOCITY_THRESHOLD`, `TRANSITION_DURATION`, `TRANSITION_EASING`. Types: `DrawerRootProps`, `DrawerContextValue`, `DrawerDirection`, `SnapPoint`, `TransitionState`, and a props type per part (`ContentProps`, `OverlayProps`, `HandleProps`, `TriggerProps`, `CloseProps`, `TitleProps`, `DescriptionProps`).
 
 ## Coming from Vaul
 
