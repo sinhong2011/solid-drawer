@@ -741,6 +741,13 @@ export function createDrawer(
       if (!on || !viewport) return;
       const el = untrack(contentEl);
       if (!el) return;
+      // What the consumer set inline, to give back - not a blank, which
+      // would wipe a `max-height` of their own (#9).
+      const was = { bottom: el.style.bottom, maxHeight: el.style.maxHeight };
+      const restore = () => {
+        el.style.bottom = was.bottom;
+        el.style.maxHeight = was.maxHeight;
+      };
       const onResize = () => {
         const focused = document.activeElement;
         const typing =
@@ -753,15 +760,13 @@ export function createDrawer(
           el.style.bottom = `${keyboard}px`;
           el.style.maxHeight = `${viewport.height - WINDOW_TOP_OFFSET}px`;
         } else {
-          el.style.bottom = "";
-          el.style.maxHeight = "";
+          restore();
         }
       };
       viewport.addEventListener("resize", onResize);
       return () => {
         viewport.removeEventListener("resize", onResize);
-        el.style.bottom = "";
-        el.style.maxHeight = "";
+        restore();
       };
     },
   );
@@ -789,6 +794,8 @@ export function createDrawer(
         const from = last;
         last = size;
         resizing = true;
+        // The consumer's own inline size, if any, comes back afterwards.
+        const was = el.style[property];
         // Held at the old size for a paint, then let go to the new one.
         el.style[property] = `${from}px`;
         el.getBoundingClientRect();
@@ -799,7 +806,7 @@ export function createDrawer(
         const done = () => {
           el.removeEventListener("transitionend", onEnd);
           window.clearTimeout(timer);
-          el.style[property] = "";
+          el.style[property] = was;
           resizing = false;
           measure();
         };
