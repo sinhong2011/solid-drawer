@@ -1,15 +1,26 @@
 ---
 import "../styles/global.css";
-import "@sinhong2011/solid-drawer/style.css";
+import { ClientRouter } from "astro:transitions";
+import Logo from "../components/Logo.astro";
+import { buttonVariants } from "@/lib/button";
+import pkg from "../../../package.json";
 
 interface Props {
   title: string;
   description?: string;
 }
-const { title, description = "A drawer for Solid 2 - Vaul's API and feel, with corvu's break points." } = Astro.props;
+const {
+  title,
+  description = "A drawer for Solid 2: snap points, flings, nested sheets, and state you can read.",
+} = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const path = Astro.url.pathname.replace(/\/$/, "");
-const current = (href: string) => (path === `${base}${href}`.replace(/\/$/, "") ? "page" : undefined);
+const current = (href: string) =>
+  path === `${base}${href}`.replace(/\/$/, "") ? "page" : undefined;
+// Text links; the current one carries a brand line on the header's bottom edge, like a tab.
+const navLink =
+  "text-muted-foreground hover:text-foreground aria-[current=page]:text-foreground relative flex h-14 items-center px-3 text-sm font-medium transition-colors after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:rounded-full after:bg-brand after:opacity-0 after:transition-opacity aria-[current=page]:after:opacity-100";
+const iconLink = buttonVariants({ variant: "ghost", size: "icon-sm" });
 ---
 
 <!doctype html>
@@ -19,27 +30,186 @@ const current = (href: string) => (path === `${base}${href}`.replace(/\/$/, "") 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" href={`data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="2" y="14" width="28" height="16" rx="6" fill="%235b5bd6"/><rect x="11" y="18" width="10" height="2.5" rx="1.25" fill="white"/></svg>')}`} />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <ClientRouter />
+    <!-- Before first paint: light, dark, or the OS's choice, so nothing flashes. -->
+    <script is:inline>
+      (function () {
+        var media = matchMedia("(prefers-color-scheme: dark)");
+        function apply() {
+          var stored = null;
+          try {
+            stored = localStorage.getItem("theme");
+          } catch (e) {}
+          var mode = stored === "light" || stored === "dark" ? stored : "system";
+          var dark = mode === "system" ? media.matches : mode === "dark";
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.dataset.theme = mode;
+        }
+        apply();
+        // In system mode the page follows the OS as it changes.
+        media.addEventListener("change", apply);
+        // The page that arrives by a client-side navigation gets the same.
+        document.addEventListener("astro:before-swap", function (event) {
+          event.newDocument.documentElement.className = document.documentElement.className;
+          event.newDocument.documentElement.dataset.theme = document.documentElement.dataset.theme;
+        });
+        window.__applyTheme = apply;
+      })();
+    </script>
   </head>
   <body>
     <div data-drawer-wrapper>
-      <header class="wrap nav">
-        <a class="nav-brand" href={`${base}/`}>solid-drawer</a>
-        <nav class="nav-links">
-          <a href={`${base}/`} aria-current={current("/")}>Demos</a>
-          <a href={`${base}/docs`} aria-current={current("/docs")}>Docs</a>
-          <a href="https://github.com/sinhong2011/solid-drawer">GitHub</a>
-          <a href="https://www.npmjs.com/package/@sinhong2011/solid-drawer">npm</a>
-        </nav>
+      <!-- Shared between pages: it stays put while the page underneath changes. -->
+      <header
+        class="bg-background/80 sticky top-0 z-40 border-b backdrop-blur"
+        transition:name="site-header"
+        transition:animate="none"
+      >
+        <div class="wrap flex h-14 items-center justify-between gap-4">
+          <a class="flex items-center gap-2.5" href={`${base}/`} aria-label="solid-drawer, home">
+            <Logo class="size-7" />
+            <span class="font-semibold tracking-tight whitespace-nowrap max-sm:sr-only">solid-drawer</span>
+            <span
+              class="bg-muted text-muted-foreground rounded-full border px-1.5 py-px font-mono text-[0.65rem] max-sm:hidden"
+              >v{pkg.version}</span
+            >
+          </a>
+          <nav class="flex shrink-0 items-center gap-0.5" aria-label="Site">
+            <a class={navLink} href={`${base}/`} aria-current={current("/")}>Demos</a>
+            <a class={navLink} href={`${base}/docs`} aria-current={current("/docs")}>Docs</a>
+            <span class="bg-border mx-2 h-5 w-px" aria-hidden="true"></span>
+            <a class={iconLink} href="https://github.com/sinhong2011/solid-drawer" aria-label="GitHub" title="GitHub">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8 0 3.2.9.8 1.3 1.9 1.3 3.1 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1 .9 2.2v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 .3"></path>
+              </svg>
+            </a>
+            <a class={`${iconLink} max-sm:hidden`} href="https://www.npmjs.com/package/@sinhong2011/solid-drawer" aria-label="npm" title="npm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m7.5 4.27 9 5.15"></path>
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                <path d="m3.3 7 8.7 5 8.7-5"></path>
+                <path d="M12 22V12"></path>
+              </svg>
+            </a>
+            <button class={iconLink} type="button" data-theme-toggle aria-label="Theme: system" title="Theme: system">
+              <svg data-theme-icon="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect width="20" height="14" x="2" y="3" rx="2"></rect>
+                <path d="M8 21h8M12 17v4"></path>
+              </svg>
+              <svg data-theme-icon="light" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+              </svg>
+              <svg data-theme-icon="dark" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+              </svg>
+            </button>
+          </nav>
+        </div>
       </header>
       <main class="wrap">
         <slot />
       </main>
-      <footer class="wrap footer">
-        MIT. Built on <a href="https://www.solidjs.com">Solid 2</a>; the feel is
-        <a href="https://vaul.emilkowal.ski">Vaul</a>'s, the break points are
-        <a href="https://corvu.dev/docs/primitives/drawer/">corvu</a>'s.
+      <footer
+        transition:name="site-footer"
+        transition:animate="none"
+        class="wrap text-muted-foreground flex flex-wrap justify-between gap-x-8 gap-y-2 border-t py-10 text-sm [&_a]:underline [&_a]:underline-offset-4">
+        <span>
+          MIT. Built for <a href="https://www.solidjs.com">Solid 2</a>.
+        </span>
+        <span>
+          <a href="https://github.com/sinhong2011/solid-drawer">Source</a> ·{" "}
+          <a href="https://github.com/sinhong2011/solid-drawer/issues">Issues</a>
+        </span>
       </footer>
     </div>
+    <script>
+      // Once per page, including pages that arrive by client-side navigation.
+      document.addEventListener("astro:page-load", () => {
+      const root = document.documentElement;
+      const NEXT: Record<string, string> = { system: "light", light: "dark", dark: "system" };
+      const showMode = () => {
+        const mode = root.dataset.theme ?? "system";
+        for (const button of document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]")) {
+          button.setAttribute("aria-label", `Theme: ${mode}`);
+          button.title = `Theme: ${mode}. Click for ${NEXT[mode]}.`;
+          for (const icon of button.querySelectorAll<SVGElement>("[data-theme-icon]"))
+            icon.classList.toggle("hidden", icon.dataset.themeIcon !== mode);
+        }
+      };
+      showMode();
+      for (const button of document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]")) {
+        button.addEventListener("click", () => {
+          const next = NEXT[root.dataset.theme ?? "system"]!;
+          try {
+            if (next === "system") localStorage.removeItem("theme");
+            else localStorage.setItem("theme", next);
+          } catch {}
+          (window as unknown as { __applyTheme: () => void }).__applyTheme();
+          showMode();
+        });
+      }
+
+      // Tabs: a click shows its panel; tabs in the same group change together and remember.
+      const select = (tabsRoot: HTMLElement, index: number) => {
+        const tabs = tabsRoot.querySelectorAll<HTMLButtonElement>(":scope > [role=tablist] > [role=tab]");
+        const panels = tabsRoot.querySelectorAll<HTMLElement>(":scope > [role=tabpanel]");
+        tabs.forEach((tab, i) => {
+          tab.setAttribute("aria-selected", i === index ? "true" : "false");
+          tab.dataset.state = i === index ? "active" : "inactive";
+        });
+        panels.forEach((panel, i) => (panel.hidden = i !== index));
+      };
+      const tabRoots = document.querySelectorAll<HTMLElement>("[data-tabs]");
+      for (const tabsRoot of tabRoots) {
+        const tabs = [...tabsRoot.querySelectorAll<HTMLButtonElement>(":scope > [role=tablist] > [role=tab]")];
+        const group = tabsRoot.dataset.tabsGroup;
+        if (group) {
+          try {
+            const remembered = localStorage.getItem(`tabs:${group}`);
+            const index = tabs.findIndex((tab) => tab.dataset.tab === remembered);
+            if (index >= 0) select(tabsRoot, index);
+          } catch {}
+        }
+        tabs.forEach((tab, index) => {
+          tab.addEventListener("click", () => {
+            select(tabsRoot, index);
+            if (!group) return;
+            try {
+              localStorage.setItem(`tabs:${group}`, tab.dataset.tab ?? "");
+            } catch {}
+            for (const other of tabRoots) {
+              if (other === tabsRoot || other.dataset.tabsGroup !== group) continue;
+              const i = [...other.querySelectorAll<HTMLButtonElement>(":scope > [role=tablist] > [role=tab]")].findIndex(
+                (t) => t.dataset.tab === tab.dataset.tab,
+              );
+              if (i >= 0) select(other, i);
+            }
+          });
+        });
+      }
+
+      // Anything marked data-copy copies its own text, or what it says to.
+      for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy]")) {
+        button.addEventListener("click", async () => {
+          const text =
+            button.dataset.copy ||
+            button.closest("[data-copy-root]")?.querySelector("pre")?.textContent ||
+            "";
+          const had = button.innerHTML;
+          try {
+            await navigator.clipboard.writeText(text);
+            button.innerHTML = button.querySelector("svg")
+              ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4"><path d="M20 6 9 17l-5-5"/></svg>'
+              : "copied";
+          } catch {
+            button.textContent = "select it";
+          }
+          setTimeout(() => (button.innerHTML = had), 1500);
+        });
+      }
+      });
+    </script>
   </body>
 </html>

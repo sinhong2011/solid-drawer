@@ -1,7 +1,7 @@
 {
   "name": "@sinhong2011/solid-drawer",
   "version": "0.1.0",
-  "description": "A drawer for Solid 2 - Vaul's API and feel, with corvu's break points and resize transitions. Snap points, flings, scroll arbitration, nested drawers, a handle that cycles, and the page scaling back behind it.",
+  "description": "A drawer for Solid 2. Snap points, flings, scroll arbitration, nested drawers, a handle that cycles, the page scaling back behind it, and state you can read.",
   "keywords": [
     "bottom-sheet",
     "corvu",
@@ -18,7 +18,7 @@
     "url": "https://github.com/sinhong2011/solid-drawer/issues"
   },
   "license": "MIT",
-  "author": "niskan516",
+  "author": "sinhong2011",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sinhong2011/solid-drawer.git"
@@ -79,5 +79,11 @@
     "node": ">=22",
     "pnpm": ">=12"
   },
-  "packageManager": "pnpm@12.1.0"
+  "packageManager": "pnpm@12.1.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
+  }
 }

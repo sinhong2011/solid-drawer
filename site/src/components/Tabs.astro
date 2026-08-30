@@ -1,0 +1,38 @@
+---
+/**
+ * Tabs. `tabs` names them; the content goes in slots `tab-0`, `tab-1`, …
+ * Tabs with the same `group` change together and remember the choice.
+ */
+interface Props {
+  tabs: string[];
+  group?: string;
+  class?: string;
+}
+const { tabs, group, class: className } = Astro.props;
+---
+
+<div data-tabs data-tabs-group={group} class:list={["my-4", className]}>
+  <div role="tablist" class="flex items-center gap-1 border-b">
+    {
+      tabs.map((tab, i) => (
+        <button
+          role="tab"
+          type="button"
+          aria-selected={i === 0 ? "true" : "false"}
+          data-state={i === 0 ? "active" : "inactive"}
+          data-tab={tab}
+          class="text-muted-foreground hover:text-foreground data-[state=active]:border-foreground data-[state=active]:text-foreground -mb-px border-b-2 border-transparent px-3 py-2 text-sm font-medium transition-colors"
+        >
+          {tab}
+        </button>
+      ))
+    }
+  </div>
+  {
+    tabs.map((_, i) => (
+      <div role="tabpanel" hidden={i !== 0} class="pt-3">
+        <slot name={`tab-${i}`} />
+      </div>
+    ))
+  }
+</div>

@@ -1,361 +1,221 @@
+@import "tailwindcss";
+/* Self-hosted: Geist for text and code, Archivo (its width axis) for display. */
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/archivo/wdth.css";
+/* The library's own stylesheet - the handle, its 44px hit area, the
+   background that runs on past the drawer's edge - in a layer, so a
+   utility on the handle wins over it. */
+@import "@sinhong2011/solid-drawer/style.css" layer(base);
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ tokens
+   shadcn/ui's names, this site's values. */
 :root {
-  color-scheme: light dark;
-  --bg: #f7f7f8;
-  --fg: #141416;
-  --muted: #6b6b73;
+  --background: #eceef2;
+  --foreground: #0f1217;
   --card: #ffffff;
-  --border: #e4e4e8;
-  --accent: #5b5bd6;
-  --accent-fg: #ffffff;
-  --scrim: rgb(0 0 0 / 0.45);
-  --code: #f0f0f3;
-  --shadow: 0 -8px 40px rgb(0 0 0 / 0.12);
-  --radius: 1.25rem;
-  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --card-foreground: #0f1217;
+  --popover: #ffffff;
+  --popover-foreground: #0f1217;
+  --primary: #0f1217;
+  --primary-foreground: #eceef2;
+  --secondary: #f4f5f8;
+  --secondary-foreground: #0f1217;
+  --muted: #f4f5f8;
+  --muted-foreground: #5f6673;
+  --accent: #e4e7ee;
+  --accent-foreground: #0f1217;
+  --destructive: #d13b3b;
+  --border: #d7dbe2;
+  --input: #aeb5c0;
+  --ring: #1f4fff;
+  --brand: #1f4fff;
+  --brand-foreground: #ffffff;
+  --marker: #e8960c;
+  --bezel: #14171c;
+  --radius: 0.6rem;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0c0c0e;
-    --fg: #f2f2f4;
-    --muted: #9a9aa3;
-    --card: #17171a;
-    --border: #26262b;
-    --accent: #8c8cf0;
-    --accent-fg: #0c0c0e;
-    --scrim: rgb(0 0 0 / 0.6);
-    --code: #1e1e23;
-    --shadow: 0 -8px 40px rgb(0 0 0 / 0.5);
+.dark {
+  --background: #0b0d11;
+  --foreground: #eef1f5;
+  --card: #151920;
+  --card-foreground: #eef1f5;
+  --popover: #151920;
+  --popover-foreground: #eef1f5;
+  --primary: #eef1f5;
+  --primary-foreground: #0b0d11;
+  --secondary: #1b2029;
+  --secondary-foreground: #eef1f5;
+  --muted: #1b2029;
+  --muted-foreground: #8b93a1;
+  --accent: #232935;
+  --accent-foreground: #eef1f5;
+  --destructive: #ff6b6b;
+  --border: #262c36;
+  --input: #414a58;
+  --ring: #7391ff;
+  --brand: #7391ff;
+  --brand-foreground: #0b0d11;
+  --marker: #ffb62e;
+  --bezel: #2a303a;
+}
+
+@theme inline {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-display: "Archivo Variable", "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-marker: var(--marker);
+  --color-bezel: var(--bezel);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Archivo's width axis: the display face is the text face, set wider. */
+@utility wide {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 110;
+}
+@utility wider {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 118;
+}
+/* A view arriving inside a drawer that is growing to fit it. */
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+@utility animate-view-in {
+  animation: view-in 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+/* The page's measure. */
+@utility wrap {
+  width: min(100% - 3rem, 74rem);
+  margin-inline: auto;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  /* The app shell a modal drawer scales back, when a demo asks it to. */
+  [data-drawer-wrapper] {
+    @apply bg-background min-h-dvh;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply wide font-semibold tracking-tight;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2;
+  }
+  /* Shiki emits both themes; the page's class picks one, not the OS. */
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-light);
+  }
+  .dark .astro-code,
+  .dark .astro-code span {
+    color: var(--shiki-dark);
+  }
+  .astro-code {
+    background: transparent !important;
   }
 }
 
-* {
-  box-sizing: border-box;
-}
-html {
-  font-family: var(--font);
-  -webkit-text-size-adjust: 100%;
-}
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  line-height: 1.55;
-}
-/* The element a modal drawer scales back, if the demo asks it to. */
-[data-drawer-wrapper] {
-  min-height: 100dvh;
-  background: var(--bg);
-}
-a {
-  color: inherit;
-}
-code,
-pre {
-  font-family: var(--mono);
-  font-size: 0.9em;
-}
-pre {
-  background: var(--code);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
-  overflow-x: auto;
-  line-height: 1.5;
-}
-:not(pre) > code {
-  background: var(--code);
-  border-radius: 0.35rem;
-  padding: 0.1em 0.35em;
-}
-
-.wrap {
-  width: min(100% - 2.5rem, 68rem);
-  margin-inline: auto;
-}
-
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  height: 3.75rem;
-}
-.nav-brand {
-  font-weight: 700;
-  text-decoration: none;
-  letter-spacing: -0.01em;
-}
-.nav-links {
-  display: flex;
-  gap: 1.25rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-.nav-links a {
-  color: var(--muted);
-  text-decoration: none;
-}
-.nav-links a:hover,
-.nav-links a[aria-current="page"] {
-  color: var(--fg);
-}
-
-.hero {
-  padding: 5rem 0 3rem;
-  max-width: 44rem;
-}
-.hero h1 {
-  font-size: clamp(2.4rem, 6vw, 3.6rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  margin: 0 0 1rem;
-}
-.hero p {
-  font-size: 1.15rem;
-  color: var(--muted);
-  margin: 0 0 1.75rem;
-}
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-}
-.install {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: var(--code);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 0.6rem 1rem;
-  font-family: var(--mono);
-  font-size: 0.9rem;
-}
-
-.btn {
-  appearance: none;
-  border: 1px solid transparent;
-  border-radius: 0.75rem;
-  padding: 0.6rem 1.1rem;
-  font: inherit;
-  font-weight: 600;
-  font-size: 0.92rem;
-  cursor: pointer;
-  background: var(--accent);
-  color: var(--accent-fg);
-  text-decoration: none;
-  transition:
-    transform 120ms ease,
-    opacity 120ms ease;
-}
-.btn:active {
-  transform: scale(0.97);
-}
-.btn-secondary {
-  background: var(--card);
-  color: var(--fg);
-  border-color: var(--border);
-}
-
-.section {
-  padding: 3rem 0;
-}
-.section h2 {
-  font-size: 1.6rem;
-  letter-spacing: -0.02em;
-  margin: 0 0 0.35rem;
-}
-.section > p {
-  color: var(--muted);
-  margin: 0 0 1.75rem;
-  max-width: 44rem;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: 1rem;
-}
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem 1.25rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-.card h3 {
-  margin: 0;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
-}
-.card p {
-  margin: 0 0 0.9rem;
-  color: var(--muted);
-  font-size: 0.92rem;
-  flex: 1;
-}
-.card-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.readout {
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: 1.5rem 2rem;
-}
-.features h3 {
-  margin: 0 0 0.25rem;
-  font-size: 1rem;
-}
-.features p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-
-.footer {
-  padding: 3rem 0 2.5rem;
-  color: var(--muted);
-  font-size: 0.85rem;
-  border-top: 1px solid var(--border);
-  margin-top: 2rem;
-}
-
-/* ---- The drawers the demos open ---- */
-
-.scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: var(--scrim);
-}
-.sheet {
-  position: fixed;
-  inset-inline: 0;
-  bottom: 0;
-  z-index: 50;
-  margin-inline: auto;
-  width: min(100%, 40rem);
-  max-height: 96dvh;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem 1.5rem;
-  background: var(--card);
-  color: var(--fg);
-  border-radius: var(--radius) var(--radius) 0 0;
-  box-shadow: var(--shadow);
-  outline: none;
-}
-.sheet--tall {
-  height: 92dvh;
-}
-.sheet--side {
-  inset-block: 0;
-  inset-inline: auto 0;
-  width: min(22rem, 92vw);
-  max-height: none;
-  margin: 0;
-  border-radius: var(--radius) 0 0 var(--radius);
-  padding-left: 2rem;
-  box-shadow: -8px 0 40px rgb(0 0 0 / 0.25);
-}
-.sheet--side [data-drawer-handle] {
-  position: absolute;
-  left: 0.6rem;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.sheet-title {
-  margin: 0.75rem 0 0;
-  font-size: 1.15rem;
-  letter-spacing: -0.01em;
-}
-.sheet-desc {
-  margin: 0;
-  color: var(--muted);
-}
-.sheet-body {
-  margin-top: 0.5rem;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-.sheet-scroll {
-  overflow-y: auto;
-  touch-action: pan-y;
-  margin: 0.5rem -0.25rem 0;
-  padding: 0 0.25rem;
-  min-height: 0;
-}
-.sheet-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.7rem 0.25rem;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.95rem;
-}
-.sheet-row span:first-child {
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 0.5rem;
-  background: var(--code);
-  display: grid;
-  place-items: center;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-.sheet-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-/* ---- Docs prose ---- */
-.prose {
-  max-width: 48rem;
-  padding: 2.5rem 0 4rem;
-}
-.prose h1 {
-  font-size: 2.4rem;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-}
-.prose h2 {
-  margin-top: 2.5rem;
-  letter-spacing: -0.02em;
-}
-.prose p,
-.prose li {
-  color: var(--fg);
-}
-.prose table {
-  display: block;
-  overflow-x: auto;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  margin: 1rem 0;
-}
-.prose th,
-.prose td {
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
-  text-align: left;
-  vertical-align: top;
-}
-.prose th {
-  background: var(--code);
+/* ------------------------------------------------------------- docs prose
+   Anything inside `.not-prose` - a live example, say - is left alone. */
+@layer components {
+  .prose {
+    @apply text-foreground/85 text-[0.95rem] leading-relaxed;
+  }
+  .prose > h1:not(.not-prose *) {
+    @apply wider text-foreground mb-3 text-[clamp(2.4rem,5vw,3.4rem)] leading-none tracking-[-0.04em];
+  }
+  .prose h2:not(.not-prose *) {
+    @apply text-foreground mt-14 mb-4 scroll-mt-24 border-t pt-8 text-2xl;
+  }
+  .prose h3:not(.not-prose *) {
+    @apply text-foreground mt-8 mb-3 scroll-mt-24 text-lg;
+  }
+  .prose h4:not(.not-prose *) {
+    @apply text-foreground mt-6 mb-2 text-base;
+  }
+  .prose p:not(.not-prose *) {
+    @apply my-4 text-pretty;
+  }
+  .prose > p:first-of-type:not(.not-prose *) {
+    @apply text-muted-foreground text-lg;
+  }
+  .prose a:not(.not-prose *) {
+    @apply text-foreground decoration-input underline underline-offset-4 hover:decoration-foreground;
+  }
+  .prose strong:not(.not-prose *) {
+    @apply text-foreground font-semibold;
+  }
+  .prose ul:not(.not-prose *) {
+    @apply my-4 list-disc space-y-1.5 pl-6;
+  }
+  .prose ol:not(.not-prose *) {
+    @apply my-4 list-decimal space-y-1.5 pl-6;
+  }
+  .prose :not(pre) > code:not(.not-prose *) {
+    @apply bg-muted rounded-sm border px-[0.35em] py-[0.1em] font-mono text-[0.86em];
+  }
+  .prose pre:not(.not-prose *) {
+    @apply bg-card my-4 overflow-x-auto rounded-lg border p-4 text-[0.82rem] leading-relaxed;
+  }
+  .prose table:not(.not-prose *) {
+    @apply my-4 block w-full overflow-x-auto text-sm;
+  }
+  .prose th:not(.not-prose *),
+  .prose td:not(.not-prose *) {
+    @apply border px-3 py-2 text-left align-top;
+  }
+  .prose th:not(.not-prose *) {
+    @apply bg-muted text-foreground font-semibold;
+  }
+  .prose td code:not(.not-prose *) {
+    @apply whitespace-nowrap;
+  }
+  .prose hr:not(.not-prose *) {
+    @apply my-10;
+  }
 }

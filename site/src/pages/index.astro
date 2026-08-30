@@ -1,40 +1,72 @@
 ---
 import Base from "../layouts/Base.astro";
-import { DemoGallery } from "../demos";
+import { DemoGallery, HeroDemo } from "../demos";
+import { buttonVariants } from "@/lib/button";
+import PmTabs from "../components/PmTabs.astro";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const eyebrow = "text-muted-foreground mb-3 font-mono text-xs tracking-[0.08em] uppercase";
 ---
 
 <Base title="solid-drawer - a drawer for Solid 2">
-  <section class="hero">
-    <h1>A drawer for Solid&nbsp;2.</h1>
-    <p>
-      Vaul's API and feel - snap points, flings, a handle you can tap, the page scaling back behind a
-      modal sheet, nested drawers - with corvu's break points and resize transitions folded in.
-      Unstyled: it moves itself; what it looks like is yours.
-    </p>
-    <div class="hero-actions">
-      <a class="btn" href={`${base}/docs`}>Read the docs</a>
-      <code class="install">pnpm add @sinhong2011/solid-drawer</code>
+  <section
+    class="grid grid-cols-1 items-center gap-x-16 gap-y-12 border-b py-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-18"
+  >
+    <div>
+      <p class={eyebrow}>Solid 2 · snap points · gestures · nested sheets</p>
+      <h1
+        class="wider mb-5 text-[clamp(2.7rem,6.2vw,5rem)] leading-[0.98] font-[640] tracking-[-0.04em] text-balance"
+      >
+        A drawer that <em class="text-brand not-italic">tells you</em> where it is.
+      </h1>
+      <p class="text-foreground/80 mb-8 max-w-[34rem] text-lg text-pretty">
+        Snap points, flings, a handle you can tap, nested sheets, the page scaling back behind a
+        modal one. And every number the gesture produces - translate, open percentage, the
+        transition it is in - readable from <code
+          class="bg-muted rounded-sm border px-1.5 py-0.5 font-mono text-[0.85em]">useDrawer()</code
+        >. Unstyled: it moves itself; what it looks like is yours.
+      </p>
+      <a class={buttonVariants()} href={`${base}/docs`}>Read the docs</a>
+      <PmTabs pkg="@sinhong2011/solid-drawer" class="mt-5 max-w-[27rem]" />
+      <p class="text-muted-foreground mt-5 text-sm">
+        The sheet on the right is live. Drag it, fling it, tap its handle; the rule and the numbers
+        are read straight from the drawer.
+      </p>
     </div>
+    <HeroDemo client:only="solid" />
   </section>
 
-  <section class="section" id="demos">
-    <h2>Try it</h2>
-    <p>
-      Every card opens a real drawer. Drag it, fling it, tap the handle, scroll inside it - on a
-      phone or with a mouse.
-    </p>
+  <section class="border-b py-16" id="demos">
+    <div class="mb-8 grid items-end gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:gap-x-12">
+      <div>
+        <p class={eyebrow}>Try it</p>
+        <h2 class="text-[clamp(1.7rem,3vw,2.3rem)] leading-[1.05]">Every row opens a real drawer.</h2>
+      </div>
+      <p class="text-foreground/80 max-w-[40rem] text-pretty">
+        Drag it, fling it, tap the handle, scroll inside it - on a phone or with a mouse. Every
+        drawer here is the <a class="underline underline-offset-4" href={`${base}/docs#installation`}
+          >drawer.tsx from the docs</a
+        >, Tailwind classes on the data attributes the library sets; the code column is the
+        configuration each row opens with.
+      </p>
+    </div>
     <DemoGallery client:only="solid" />
   </section>
 
-  <section class="section">
-    <h2>What you get</h2>
-    <div class="features">
+  <section class="py-16">
+    <div class="mb-8">
+      <p class={eyebrow}>What you get</p>
+      <h2 class="max-w-[24ch] text-[clamp(1.7rem,3vw,2.3rem)] leading-[1.05]">
+        The parts of a sheet that are hard to get right.
+      </h2>
+    </div>
+    <div
+      class="grid border-t border-l sm:grid-cols-2 lg:grid-cols-3 [&>div]:border-r [&>div]:border-b [&>div]:p-6 [&_h3]:mb-2 [&_h3]:text-base [&_p]:text-foreground/80 [&_p]:text-[0.93rem] [&_p]:text-pretty [&_code]:bg-muted [&_code]:rounded-sm [&_code]:border [&_code]:px-1 [&_code]:font-mono [&_code]:text-[0.86em]"
+    >
       <div>
         <h3>Snap points that mean what they say</h3>
         <p>
           Fractions of the container or pixel strings, and either shows exactly that much of the
-          drawer whatever height its content has.
+          drawer, whatever height its content has.
         </p>
       </div>
       <div>

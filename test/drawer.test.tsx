@@ -152,6 +152,42 @@ describe("Drawer", () => {
     expect(document.body.style.position).toBe("");
   });
 
+  it("pins the page once, however many drawers are open over it", async () => {
+    Object.defineProperty(window, "scrollY", { value: 300, configurable: true });
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const [open, setOpen] = createSignal(true);
+    const [inner, setInner] = createSignal(false);
+    mount(() => (
+      <Drawer.Root open={open()} onOpenChange={setOpen} transitionDuration={10}>
+        <Drawer.Content>
+          <Drawer.NestedRoot open={inner()} onOpenChange={setInner} transitionDuration={10}>
+            <Drawer.Content />
+          </Drawer.NestedRoot>
+        </Drawer.Content>
+      </Drawer.Root>
+    ));
+    await tick();
+    expect(document.body.style.top).toBe("-300px");
+
+    // The body is already fixed, so scrollY now reads 0; the nested drawer must not re-pin at 0.
+    Object.defineProperty(window, "scrollY", { value: 0, configurable: true });
+    setInner(true);
+    await tick();
+    expect(document.body.style.top).toBe("-300px");
+
+    setInner(false);
+    await tick();
+    expect(document.body.style.position).toBe("fixed");
+    expect(document.body.style.top).toBe("-300px");
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    setOpen(false);
+    await tick();
+    expect(document.body.style.position).toBe("");
+    expect(scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 300 }));
+    scrollTo.mockRestore();
+  });
+
   it("opens at the first snap point and rests at the one it is pulled to", async () => {
     const changes: (SnapPoint | null)[] = [];
     mount(() => (

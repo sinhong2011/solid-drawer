@@ -1,0 +1,42 @@
+---
+import { Code } from "astro:components";
+
+interface Props {
+  code: string;
+  lang?: string;
+  title?: string;
+  class?: string;
+}
+const { code, lang = "tsx", title, class: className } = Astro.props;
+---
+
+<figure
+  data-copy-root
+  class:list={["bg-card group relative my-4 overflow-hidden rounded-lg border", className]}
+>
+  {
+    title && (
+      <figcaption class="bg-muted/50 text-muted-foreground flex h-10 items-center border-b px-4 font-mono text-xs">
+        {title}
+      </figcaption>
+    )
+  }
+  <button
+    type="button"
+    data-copy
+    class="bg-card/80 text-muted-foreground hover:bg-accent hover:text-foreground absolute top-1 right-1.5 grid size-8 place-items-center rounded-md border transition-colors"
+    aria-label="Copy code"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+    </svg>
+  </button>
+  <Code
+    code={code}
+    lang={lang as never}
+    themes={{ light: "github-light", dark: "github-dark" }}
+    defaultColor={false}
+    class="overflow-x-auto p-4 pr-12 text-[0.82rem] leading-relaxed"
+  />
+</figure>

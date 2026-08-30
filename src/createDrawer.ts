@@ -34,6 +34,43 @@ import type { DrawerContextValue, DrawerRootProps, SnapPoint, TransitionState } 
 const openDrawers: DrawerContextValue[] = [];
 const isTop = (ctx: DrawerContextValue) => openDrawers[openDrawers.length - 1] === ctx;
 
+/*
+ * The page is pinned once, by the first modal drawer to open, and let go by
+ * the last to close. A nested drawer opening over a pinned page must not pin
+ * it again: the body is already `position: fixed`, so `scrollY` reads 0 and
+ * a second pin would send the page to the top.
+ */
+let bodyLocks = 0;
+let bodyLock: { position: string; top: string; width: string; offset: number } | null = null;
+
+const lockBody = () => {
+  if (bodyLocks++ > 0) return;
+  const style = document.body.style;
+  bodyLock = {
+    position: style.position,
+    top: style.top,
+    width: style.width,
+    offset: window.scrollY,
+  };
+  // Pinned at its offset rather than `overflow: hidden`, which iOS Safari
+  // ignores - the page keeps rubber-banding behind the sheet.
+  style.position = "fixed";
+  style.top = `-${bodyLock.offset}px`;
+  style.width = "100%";
+};
+
+const unlockBody = () => {
+  if (--bodyLocks > 0 || !bodyLock) return;
+  const style = document.body.style;
+  style.position = bodyLock.position;
+  style.top = bodyLock.top;
+  style.width = bodyLock.width;
+  // Instant whatever `scroll-behavior` the page sets: this is the page being
+  // put back where it was, not a scroll.
+  window.scrollTo({ top: bodyLock.offset, left: window.scrollX, behavior: "instant" });
+  bodyLock = null;
+};
+
 /** A recent point on the drag, for the speed it was let go at. */
 interface Sample {
   time: number;
@@ -111,7 +148,7 @@ export function createDrawer(
 
   /** The box snap point fractions are of. */
   const boxOf = (el: HTMLElement): HTMLElement | null => {
-    const given = container();
+    const given = untrack(container);
     if (given) return given;
     if (getComputedStyle(el).position === "fixed") return null;
     const parent = el.offsetParent;
@@ -274,7 +311,7 @@ export function createDrawer(
   const startTransition = (state: Exclude<TransitionState, null>) => {
     setTransitionState(state);
     window.clearTimeout(endTimer);
-    endTimer = window.setTimeout(finishTransition, duration() + 50);
+    endTimer = window.setTimeout(finishTransition, untrack(duration) + 50);
   };
 
   const onTransitionEnd = (event: TransitionEvent) => {
@@ -302,7 +339,9 @@ export function createDrawer(
         openDrawers.push(ctx);
         const points = untrack(snapPoints);
         if (points?.length && untrack(activeSnapPoint) === null) {
-          setActiveSnapPoint(props.defaultActiveSnapPoint ?? (points[0] as SnapPoint));
+          setActiveSnapPoint(
+            untrack(() => props.defaultActiveSnapPoint) ?? (points[0] as SnapPoint),
+          );
         }
         startTransition("opening");
         // The parts mount on this flush and paint closed; the frame after,
@@ -583,7 +622,7 @@ export function createDrawer(
       if (!el) return;
       const previous =
         document.activeElement instanceof HTMLElement ? document.activeElement : null;
-      const first = props.autoFocus
+      const first = untrack(() => props.autoFocus)
         ? (el.querySelector<HTMLElement>("[autofocus]") ?? focusableIn(el)[0] ?? el)
         : el;
       first.focus({ preventScroll: true });
@@ -609,7 +648,7 @@ export function createDrawer(
       el.addEventListener("keydown", onKey);
       return () => {
         el.removeEventListener("keydown", onKey);
-        if (props.restoreFocus !== false) previous?.focus({ preventScroll: true });
+        if (untrack(() => props.restoreFocus) !== false) previous?.focus({ preventScroll: true });
       };
     },
   );
@@ -620,20 +659,8 @@ export function createDrawer(
     () => mounted() && modal() && !props.disablePreventScroll && !props.noBodyStyles,
     (lock) => {
       if (!lock) return;
-      const style = document.body.style;
-      const previous = { position: style.position, top: style.top, width: style.width };
-      const offset = window.scrollY;
-      // Pinned at its offset rather than `overflow: hidden`, which iOS Safari
-      // ignores - the page keeps rubber-banding behind the sheet.
-      style.position = "fixed";
-      style.top = `-${offset}px`;
-      style.width = "100%";
-      return () => {
-        style.position = previous.position;
-        style.top = previous.top;
-        style.width = previous.width;
-        window.scrollTo(0, offset);
-      };
+      lockBody();
+      return unlockBody;
     },
   );
 
@@ -683,9 +710,10 @@ export function createDrawer(
         overflow: el.style.overflow,
         radius: el.style.borderRadius,
       };
-      if (props.setBackgroundColorOnScale !== false && !props.noBodyStyles)
-        body.background = "black";
-      el.style.transition = `transform ${duration()}ms ${easing()}, border-radius ${duration()}ms ${easing()}`;
+      const paint = untrack(() => props.setBackgroundColorOnScale !== false && !props.noBodyStyles);
+      if (paint) body.background = "black";
+      const settle = `${untrack(duration)}ms ${untrack(easing)}`;
+      el.style.transition = `transform ${settle}, border-radius ${settle}`;
       el.style.transformOrigin = untrack(vertical) ? "center top" : "left center";
       el.style.overflow = "hidden";
       const frame = window.requestAnimationFrame(() => applyScale(el, 0));
@@ -699,7 +727,7 @@ export function createDrawer(
           el.style.transition = was.transition;
           el.style.transformOrigin = was.origin;
           el.style.overflow = was.overflow;
-        }, duration());
+        }, untrack(duration));
       };
     },
   );

@@ -2,6 +2,8 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import solid from "vite-plugin-solid";
+import tailwindcss from "@tailwindcss/vite";
+import mdx from "@astrojs/mdx";
 
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -25,11 +27,16 @@ function solid2() {
         });
         updateConfig({
           vite: {
-            plugins: [solid()],
+            // `ssr`: the server bundle gets server code even though every island is
+            // `client:only` - the modules are still imported there.
+            plugins: [solid({ ssr: true }), tailwindcss()],
             // The drawer is linked from the workspace root, which carries its
             // own copy of Solid; one page, one Solid.
             resolve: { dedupe: ["solid-js", "@solidjs/web"] },
-            optimizeDeps: { exclude: ["@sinhong2011/solid-drawer"] },
+            optimizeDeps: {
+              exclude: ["@sinhong2011/solid-drawer"],
+              include: ["clsx", "tailwind-merge"],
+            },
           },
         });
       },
@@ -38,7 +45,12 @@ function solid2() {
 }
 
 export default defineConfig({
+  // Served from the root: home is `/`, the docs `/docs`. Links are built from
+  // `import.meta.env.BASE_URL`, so a base can be put back here if needed.
   site: "https://sinhong2011.github.io",
-  base: "/solid-drawer",
-  integrations: [solid2()],
+  integrations: [solid2(), mdx()],
+  markdown: {
+    // Both themes are emitted; the site's CSS picks one by the page's theme.
+    shikiConfig: { themes: { light: "github-light", dark: "github-dark" }, defaultColor: false },
+  },
 });

@@ -3,7 +3,10 @@
   "compilerOptions": {
     "jsx": "preserve",
     "jsxImportSource": "@solidjs/web",
-    "types": ["astro/client"]
+    "types": ["astro/client"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [".astro/types.d.ts", "src/**/*", "astro.config.mjs"]
 }

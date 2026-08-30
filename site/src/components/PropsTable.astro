@@ -1,0 +1,65 @@
+---
+/**
+ * An API table, after Fumadocs' TypeTable: one row per prop - its name and
+ * what it does on the left, its type and default beside. Backticks in a
+ * description become code.
+ */
+import type { PropRow } from "../content/props";
+
+interface Props {
+  rows: PropRow[];
+  /** Column titles. */
+  labels?: [string, string, string];
+  /** Two columns when nothing has a default. */
+  columns?: 2 | 3;
+}
+const { rows, labels = ["Prop", "Type", "Default"], columns: count = 3 } = Astro.props;
+
+const escape = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const describe = (text: string) =>
+  escape(text).replace(/`([^`]+)`/g, '<code class="bg-muted rounded-sm border px-[0.3em] py-px font-mono text-[0.85em]">$1</code>');
+const columns =
+  count === 3
+    ? "md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.55fr)]"
+    : "md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]";
+---
+
+<div class="not-prose bg-card my-4 overflow-hidden rounded-lg border text-sm">
+  <div
+    class:list={[
+      "bg-muted/50 text-muted-foreground hidden gap-x-6 border-b px-4 py-2 font-mono text-[0.7rem] tracking-[0.08em] uppercase md:grid",
+      columns,
+    ]}
+  >
+    <span>{labels[0]}</span>
+    <span>{labels[1]}</span>
+    {count === 3 && <span>{labels[2]}</span>}
+  </div>
+  {
+    rows.map((row) => (
+      <div class:list={["grid items-start gap-x-6 gap-y-1.5 border-b px-4 py-3 last:border-b-0", columns]}>
+        <div class="min-w-0">
+          <code class="text-brand font-mono text-[0.86rem] font-medium">{row.name}</code>
+          <p class="text-foreground/75 mt-1 text-[0.83rem] leading-relaxed text-pretty" set:html={describe(row.description)} />
+        </div>
+        <div class="min-w-0 max-md:flex max-md:items-baseline max-md:gap-2">
+          <span class="text-muted-foreground/70 font-mono text-[0.65rem] tracking-[0.08em] uppercase md:hidden">{labels[1]}</span>
+          <code class="text-muted-foreground font-mono text-[0.78rem] leading-relaxed wrap-anywhere">{row.type}</code>
+        </div>
+        {count === 3 && (
+        <div class="min-w-0 max-md:flex max-md:items-baseline max-md:gap-2">
+          <span class="text-muted-foreground/70 font-mono text-[0.65rem] tracking-[0.08em] uppercase md:hidden">{labels[2]}</span>
+          {
+            row.default ? (
+              <code class="bg-muted inline-block rounded-sm border px-1.5 py-0.5 font-mono text-[0.75rem] wrap-anywhere">{row.default}</code>
+            ) : (
+              <span class="text-muted-foreground/50" aria-label="none">—</span>
+            )
+          }
+        </div>
+        )}
+      </div>
+    ))
+  }
+</div>
