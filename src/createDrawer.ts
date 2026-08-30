@@ -778,7 +778,11 @@ export function createDrawer(
       const observer = new ResizeObserver(() => {
         if (resizing || untrack(isDragging)) return;
         const size = untrack(vertical) ? el.offsetHeight : el.offsetWidth;
-        if (last === 0 || Math.abs(size - last) < 1) {
+        const state = untrack(transitionState);
+        // A drawer on its way out is not resized: its size no longer shows,
+        // and a resize in place of the close would leave the drawer mounted,
+        // its overlay over the page, once the close ended unheard.
+        if (state === "closing" || last === 0 || Math.abs(size - last) < 1) {
           last = size;
           return;
         }
@@ -788,7 +792,9 @@ export function createDrawer(
         // Held at the old size for a paint, then let go to the new one.
         el.style[property] = `${from}px`;
         el.getBoundingClientRect();
-        startTransition("resizing");
+        // An opening settle keeps its state: the size animates alongside it,
+        // and the open is still reported when the transform ends.
+        if (state === null) startTransition("resizing");
         el.style[property] = `${size}px`;
         const done = () => {
           el.removeEventListener("transitionend", onEnd);
