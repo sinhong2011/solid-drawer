@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/sinhong2011/solid-drawer/compare/v0.1.2...v0.1.3) (2026-08-30)
+
+
+### Bug Fixes
+
+* give back a consumer's inline max-height and bottom after repositioning for the keyboard ([9a5e110](https://github.com/sinhong2011/solid-drawer/commit/9a5e1103a881ee8e163c2233650669739b00cf8a))
+* give back a consumer's inline max-height and bottom after repositioning for the keyboard ([89bb9aa](https://github.com/sinhong2011/solid-drawer/commit/89bb9aa0a4f3413b44d4acc18fd322090f8bf3e7)), closes [#9](https://github.com/sinhong2011/solid-drawer/issues/9)
+
 ## [0.1.2](https://github.com/sinhong2011/solid-drawer/compare/v0.1.1...v0.1.2) (2026-08-30)
 
 
