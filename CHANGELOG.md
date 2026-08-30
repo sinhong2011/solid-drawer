@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/sinhong2011/solid-drawer/compare/v0.1.1...v0.1.2) (2026-08-30)
+
+
+### Bug Fixes
+
+* keep a resize from swallowing the close transition ([d472d46](https://github.com/sinhong2011/solid-drawer/commit/d472d4604dd57d5bfddcaa1460c41acd6fbf37ec))
+
 ## [0.1.1](https://github.com/sinhong2011/solid-drawer/compare/v0.1.0...v0.1.1) (2026-08-30)
 
 
