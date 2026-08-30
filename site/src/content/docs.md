@@ -1,12 +1,8 @@
-# @sinhong2011/solid-drawer
-
-[![npm](https://img.shields.io/npm/v/@sinhong2011/solid-drawer)](https://www.npmjs.com/package/@sinhong2011/solid-drawer) [![CI](https://github.com/sinhong2011/solid-drawer/actions/workflows/ci.yml/badge.svg)](https://github.com/sinhong2011/solid-drawer/actions/workflows/ci.yml)
+# Docs
 
 A drawer for **Solid 2**. [Vaul](https://vaul.emilkowal.ski)'s API and feel — snap points, flings, a handle you can tap, the page scaling back behind a modal sheet, nested drawers — with the good parts of [corvu](https://corvu.dev/docs/primitives/drawer/) folded in: break points between snap points, a transition state you can read, an `openPercentage`, and size changes that animate instead of jump.
 
 Unstyled. The drawer moves itself with inline `transform`/`transition`; where it sits, and what it looks like, is yours.
-
-**[Demos and docs](https://sinhong2011.github.io/solid-drawer/)**
 
 ```bash
 pnpm add @sinhong2011/solid-drawer

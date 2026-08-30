@@ -3,7 +3,7 @@ name: Release
 # Publishes to npm when a version tag is pushed: `git tag v0.1.0 && git push --tags`.
 # Needs an `NPM_TOKEN` repository secret (an npm automation token), or npm
 # trusted publishing configured for this repository, in which case the token
-# step can be dropped.
+# line can be dropped.
 
 on:
   push:
@@ -18,18 +18,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: pnpm
           registry-url: https://registry.npmjs.org
-      - run: bun install --frozen-lockfile
-      - run: bun run check
-      - run: bun run typecheck
-      - run: bun run test
-      - run: bun run build
-      - run: npm publish --provenance --access public
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
+      - run: pnpm run typecheck
+      - run: pnpm run test
+      - run: pnpm run build
+      - run: pnpm publish --provenance --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

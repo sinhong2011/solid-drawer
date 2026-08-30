@@ -1,0 +1,45 @@
+---
+import "../styles/global.css";
+import "@sinhong2011/solid-drawer/style.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = "A drawer for Solid 2 - Vaul's API and feel, with corvu's break points." } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const path = Astro.url.pathname.replace(/\/$/, "");
+const current = (href: string) => (path === `${base}${href}`.replace(/\/$/, "") ? "page" : undefined);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={`data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="2" y="14" width="28" height="16" rx="6" fill="%235b5bd6"/><rect x="11" y="18" width="10" height="2.5" rx="1.25" fill="white"/></svg>')}`} />
+  </head>
+  <body>
+    <div data-drawer-wrapper>
+      <header class="wrap nav">
+        <a class="nav-brand" href={`${base}/`}>solid-drawer</a>
+        <nav class="nav-links">
+          <a href={`${base}/`} aria-current={current("/")}>Demos</a>
+          <a href={`${base}/docs`} aria-current={current("/docs")}>Docs</a>
+          <a href="https://github.com/sinhong2011/solid-drawer">GitHub</a>
+          <a href="https://www.npmjs.com/package/@sinhong2011/solid-drawer">npm</a>
+        </nav>
+      </header>
+      <main class="wrap">
+        <slot />
+      </main>
+      <footer class="wrap footer">
+        MIT. Built on <a href="https://www.solidjs.com">Solid 2</a>; the feel is
+        <a href="https://vaul.emilkowal.ski">Vaul</a>'s, the break points are
+        <a href="https://corvu.dev/docs/primitives/drawer/">corvu</a>'s.
+      </footer>
+    </div>
+  </body>
+</html>

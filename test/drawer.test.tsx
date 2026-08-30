@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { createSignal, flush } from "solid-js";
 import { render } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";

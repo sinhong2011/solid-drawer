@@ -1,18 +1,20 @@
 # Contributing
 
-Thanks for looking. The package uses [Bun](https://bun.sh) and [Vite+](https://vite.dev) (`vp`).
+Thanks for looking. The package uses [pnpm](https://pnpm.io) 12 and [Vite+](https://vite.dev) (`vp`).
 
 ```bash
-bun install
-bun run test:watch   # jsdom tests in test/
-bun run check        # lint + format (`vp check --fix` to apply)
-bun run typecheck
-bun run build        # dist/ via `vp pack`
+pnpm install
+pnpm test:watch   # jsdom tests in test/
+pnpm check        # lint + format (`pnpm vp check --fix` to apply)
+pnpm typecheck
+pnpm build        # dist/ via `vp pack`
+pnpm site:dev     # the demo and docs site, in site/
 ```
 
 - Keep the drawer unstyled: it moves itself with inline transforms; how it looks stays the consumer's business.
 - Every behaviour change should come with a test in `test/`. jsdom has no layout, so the tests hand the drawer its sizes and build pointer events by hand - `test/drawer.test.tsx` shows how.
 - Match Vaul's names and defaults where a feature is Vaul's; note anything that deliberately differs in the README's last section.
+- The site's docs page is the README, so a change to the API is a change to `README.md`.
 
 ## Releasing
 

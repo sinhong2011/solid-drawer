@@ -57,7 +57,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vp test --run",
     "test:watch": "vp test",
-    "prepublishOnly": "bun run check && bun run typecheck && bun run test && bun run build"
+    "site:dev": "pnpm --filter solid-drawer-site dev",
+    "site:build": "pnpm --filter solid-drawer-site build",
+    "site:preview": "pnpm --filter solid-drawer-site preview",
+    "prepublishOnly": "pnpm run check && pnpm run typecheck && pnpm run test && pnpm run build"
   },
   "devDependencies": {
     "@solidjs/web": "2.0.0-rc.4",
@@ -73,6 +76,8 @@
     "solid-js": ">=2.0.0-rc.0"
   },
   "engines": {
-    "node": ">=20"
-  }
+    "node": ">=22",
+    "pnpm": ">=12"
+  },
+  "packageManager": "pnpm@12.1.0"
 }

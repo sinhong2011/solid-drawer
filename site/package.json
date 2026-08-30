@@ -1,0 +1,17 @@
+{
+  "name": "solid-drawer-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@sinhong2011/solid-drawer": "workspace:*",
+    "@solidjs/web": "2.0.0-rc.4",
+    "astro": "^7.2.9",
+    "solid-js": "2.0.0-rc.4",
+    "vite-plugin-solid": "3.0.0-next.27"
+  }
+}

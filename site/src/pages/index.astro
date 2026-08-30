@@ -1,0 +1,77 @@
+---
+import Base from "../layouts/Base.astro";
+import { DemoGallery } from "../demos";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<Base title="solid-drawer - a drawer for Solid 2">
+  <section class="hero">
+    <h1>A drawer for Solid&nbsp;2.</h1>
+    <p>
+      Vaul's API and feel - snap points, flings, a handle you can tap, the page scaling back behind a
+      modal sheet, nested drawers - with corvu's break points and resize transitions folded in.
+      Unstyled: it moves itself; what it looks like is yours.
+    </p>
+    <div class="hero-actions">
+      <a class="btn" href={`${base}/docs`}>Read the docs</a>
+      <code class="install">pnpm add @sinhong2011/solid-drawer</code>
+    </div>
+  </section>
+
+  <section class="section" id="demos">
+    <h2>Try it</h2>
+    <p>
+      Every card opens a real drawer. Drag it, fling it, tap the handle, scroll inside it - on a
+      phone or with a mouse.
+    </p>
+    <DemoGallery client:only="solid" />
+  </section>
+
+  <section class="section">
+    <h2>What you get</h2>
+    <div class="features">
+      <div>
+        <h3>Snap points that mean what they say</h3>
+        <p>
+          Fractions of the container or pixel strings, and either shows exactly that much of the
+          drawer whatever height its content has.
+        </p>
+      </div>
+      <div>
+        <h3>Gestures that cannot be lost</h3>
+        <p>
+          The drag is heard on <code>window</code> from <code>pointerdown</code>, so a quick flick
+          from the handle counts even when the finger leaves the drawer.
+        </p>
+      </div>
+      <div>
+        <h3>Scroll and drag, arbitrated</h3>
+        <p>
+          Content that scrolls keeps scrolling; a drag only starts from the top of it, and a
+          <code>scrollLockTimeout</code> stops a scroll turning into a drag by accident.
+        </p>
+      </div>
+      <div>
+        <h3>State you can read</h3>
+        <p>
+          <code>openPercentage</code>, <code>translate</code>, <code>transitionState</code> and
+          <code>isDragging</code> from <code>useDrawer()</code>, for building anything on top.
+        </p>
+      </div>
+      <div>
+        <h3>Accessible by default</h3>
+        <p>
+          A labelled dialog, focus held inside a modal drawer and given back after, Escape to
+          close, and a 44px handle target.
+        </p>
+      </div>
+      <div>
+        <h3>Headless when you want it</h3>
+        <p>
+          <code>createDrawer(props)</code> is the whole thing without elements, for parts of your
+          own.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
