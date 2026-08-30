@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/sinhong2011/solid-drawer/compare/v0.1.0...v0.1.1) (2026-08-30)
+
+
+### Bug Fixes
+
+* **site:** serve from /solid-drawer, the project's GitHub Pages path ([8bbb07c](https://github.com/sinhong2011/solid-drawer/commit/8bbb07cab422f51f17f5bcf1b7e7c4fbdb5cdde2))
+
 ## 0.1.0
 
 First release.
