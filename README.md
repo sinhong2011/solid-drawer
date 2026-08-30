@@ -2,11 +2,11 @@
 
 [![npm](https://img.shields.io/npm/v/@sinhong2011/solid-drawer)](https://www.npmjs.com/package/@sinhong2011/solid-drawer) [![CI](https://github.com/sinhong2011/solid-drawer/actions/workflows/ci.yml/badge.svg)](https://github.com/sinhong2011/solid-drawer/actions/workflows/ci.yml)
 
-A drawer for **Solid 2**. [Vaul](https://vaul.emilkowal.ski)'s API and feel — snap points, flings, a handle you can tap, the page scaling back behind a modal sheet, nested drawers — with the good parts of [corvu](https://corvu.dev/docs/primitives/drawer/) folded in: break points between snap points, a transition state you can read, an `openPercentage`, and size changes that animate instead of jump.
+A drawer for **Solid 2**. Snap points, flings, a handle you can tap, the page scaling back behind a modal sheet, nested drawers, break points between snap points, a transition state you can read, an `openPercentage`, and size changes that animate instead of jump.
 
 Unstyled. The drawer moves itself with inline `transform`/`transition`; where it sits, and what it looks like, is yours.
 
-**[Demos and docs](https://sinhong2011.github.io/solid-drawer/)**
+**[Demos and docs](https://sinhong2011.github.io/solid-drawer/)** — a copy-paste [`drawer.tsx`](https://sinhong2011.github.io/solid-drawer/docs#installation) for Tailwind projects, and live examples of [snap points](https://sinhong2011.github.io/solid-drawer/docs#snap-points), [scrolling content](https://sinhong2011.github.io/solid-drawer/docs#scrolling-content), [forms](https://sinhong2011.github.io/solid-drawer/docs#form), [handle-only dragging](https://sinhong2011.github.io/solid-drawer/docs#handle-only), [non-dismissible sheets](https://sinhong2011.github.io/solid-drawer/docs#not-dismissible), [nested drawers](https://sinhong2011.github.io/solid-drawer/docs#nested-drawers), [all four edges](https://sinhong2011.github.io/solid-drawer/docs#four-edges), [non-modal](https://sinhong2011.github.io/solid-drawer/docs#non-modal), [the scaled background](https://sinhong2011.github.io/solid-drawer/docs#scaled-background), [resize transitions](https://sinhong2011.github.io/solid-drawer/docs#resize-transition), [dynamic height](https://sinhong2011.github.io/solid-drawer/docs#dynamic-height) (the Family wallet drawer), [controlled state](https://sinhong2011.github.io/solid-drawer/docs#controlled), [an always-visible sheet with a minimum height](https://sinhong2011.github.io/solid-drawer/docs#always-visible), and [a drawer inside a panel](https://sinhong2011.github.io/solid-drawer/docs#inside-a-panel).
 
 ```bash
 pnpm add @sinhong2011/solid-drawer
@@ -46,14 +46,14 @@ function Sheet() {
 
 A number is a fraction of the **container** — the `container` element if you gave one, else the content's positioned ancestor (a drawer that lives inside a map panel measures against the panel), else the window. A string is pixels. Both mean _how much of the drawer shows_: the content keeps its own height and is translated so that much of it is on screen, so give it a height at least as tall as the largest snap point.
 
-Control it by value, as in Vaul:
+Control it by value:
 
 ```tsx
 const [point, setPoint] = createSignal<SnapPoint | null>(0.3);
 <Drawer.Root snapPoints={[0.3, 0.9]} activeSnapPoint={point()} setActiveSnapPoint={setPoint} />;
 ```
 
-`breakPoints` (from corvu) moves the line between two snap points that decides where a dropped drawer goes — one entry per gap, `null` for the midpoint. `snapToSequentialPoint` makes a fling move one point at a time.
+`breakPoints` moves the line between two snap points that decides where a dropped drawer goes — one entry per gap, `null` for the midpoint. `snapToSequentialPoint` makes a fling move one point at a time.
 
 ## Root props
 
@@ -103,12 +103,18 @@ drawer.translate();
 
 `createDrawer(props)` is the whole thing without elements, for building your own parts on.
 
-## Differences from Vaul
+## Coming from Vaul
+
+The props and parts have Vaul's names, so a Vaul drawer moves over as it is. What is different:
 
 - Snap point fractions are of the container (as Vaul) but the offset is computed from the drawer's own height, so `"320px"` shows exactly 320px whatever height the content has.
 - The gesture is heard on `window` from `pointerdown`, so a quick flick from the handle cannot escape the drawer before it counts.
 - `breakPoints`, `transitionResize`, `transitionState`, `openPercentage`, `translate`, `velocityThreshold`, `dampFunction`, `transitionDuration`/`transitionEasing` are additions.
 - Not ported: the 500ms "just opened" drag lock, `repositionInputs`' Firefox-on-Android special case, `noBodyStyles` splitting from `setBackgroundColorOnScale`.
+
+## Credits
+
+The API and feel follow [Vaul](https://vaul.emilkowal.ski). Break points, the resize transition and the readable transition state came from [corvu](https://corvu.dev/docs/primitives/drawer/). The styled component in the docs is a port of [shadcn/ui](https://ui.shadcn.com/docs/components/drawer)'s Drawer.
 
 ## Contributing
 

@@ -1,0 +1,294 @@
+import Tabs from "@/components/Tabs.astro";
+import PmTabs from "@/components/PmTabs.astro";
+import CodeBlock from "@/components/CodeBlock.astro";
+import Callout from "@/components/Callout.astro";
+import PropsTable from "@/components/PropsTable.astro";
+import { rootProps, dataAttributes } from "./props";
+import { DocsPreview, DocsExample } from "@/demos";
+import drawerSource from "@/components/ui/drawer.tsx?raw";
+import utilsSource from "@/lib/utils.ts?raw";
+
+import {
+  controlled,
+  directions,
+  dynamic,
+  form,
+  handleOnly,
+  nonDismissible,
+  headless,
+  nested,
+  nonModal,
+  panel,
+  persistent,
+  plainCss,
+  plainCssStyles,
+  preview,
+  resize,
+  scaled,
+  scroll,
+  snap,
+  snapControlled,
+  stylesheet,
+  stylesheetPlain,
+  usage,
+} from "./snippets";
+
+# Drawer
+
+A drawer for Solid 2. Snap points, flings, a handle you can tap, nested sheets, the page scaling back behind a modal one - and every number the gesture produces, readable from `useDrawer()`.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <div
+    slot="tab-0"
+    class="not-prose bg-card/60 flex min-h-[320px] items-center justify-center rounded-lg border p-10"
+  >
+    <DocsPreview client:only="solid" />
+  </div>
+  <div slot="tab-1">
+    <CodeBlock code={preview} title="components/drawer-demo.tsx" class="my-0" />
+  </div>
+</Tabs>
+
+## About
+
+`@sinhong2011/solid-drawer` is the primitive: unstyled parts that move themselves with inline `transform` and `transition`, and a `useDrawer()` that reads back where the drawer is. Where it sits, and what it looks like, is yours.
+
+This page documents the styled component, `components/ui/drawer.tsx`, which you copy in the installation step. The demos on the front page use the same file.
+
+## Installation
+
+### Install the package
+
+<PmTabs pkg="@sinhong2011/solid-drawer" />
+
+<Callout title="Solid 2 only">
+  It needs `solid-js` and `@solidjs/web` at `2.0.0-rc.0` or later. Solid 1 has its own drawers.
+</Callout>
+
+### Add the stylesheet
+
+Optional. It styles the handle, gives it a 44px hit area, and paints the drawer's background on past its far edge, so a pull beyond open shows the drawer and not the page.
+
+<Callout type="tip" title="In a layer">
+  Import it with `layer(base)` so a Tailwind utility on the handle wins over it.
+</Callout>
+
+<CodeBlock code={stylesheet} lang="css" title="app.css" />
+
+Without Tailwind, import it anywhere:
+
+<CodeBlock code={stylesheetPlain} lang="ts" />
+
+### Copy the component
+
+Into `components/ui/drawer.tsx`. It follows [shadcn/ui's Drawer](https://ui.shadcn.com/docs/components/drawer), on this library's primitives and its `data-drawer-direction` attribute.
+
+<CodeBlock code={drawerSource} title="components/ui/drawer.tsx" />
+
+### Update the import paths
+
+The component imports `cn` from `@/lib/utils`. If you do not have it:
+
+<CodeBlock code={utilsSource} lang="ts" title="lib/utils.ts" />
+
+<PmTabs pkg="clsx tailwind-merge" />
+
+## Usage
+
+<CodeBlock code={usage} />
+
+`DrawerTrigger` and `DrawerClose` render a `button` by default and take `as` to render as something else - a `Button` of your own, say.
+
+## Examples
+
+### Snap points
+
+A number is a fraction of the **container** - the `container` element if you gave one, else the content's positioned ancestor, else the window. A string is pixels. Both mean _how much of the drawer shows_: the content keeps its own height and is translated so that much of it is on screen.
+
+<Callout type="warn" title="Give it a height">
+  The component's `max-h-[80vh]` and auto height are for a plain sheet. A drawer with snap points
+  needs a height of its own, at least as tall as the largest snap point - `h-[92dvh] max-h-none!` in
+  the example.
+</Callout>
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="snap" client:only="solid" />
+  <CodeBlock slot="tab-1" code={snap} class="my-0" />
+</Tabs>
+
+Control the active one by value:
+
+<CodeBlock code={snapControlled} />
+
+`breakPoints` moves the line between two snap points that decides where a dropped drawer goes - one entry per gap, `null` for the midpoint. `snapToSequentialPoint` makes a fling move one point at a time. `fadeFromIndex` is the snap point the overlay is fully visible from.
+
+### Scrolling content
+
+Content that scrolls keeps scrolling; a drag only starts from the top of it, and a `scrollLockTimeout` stops a scroll that runs out from turning into a drag.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="scroll" client:only="solid" />
+  <CodeBlock slot="tab-1" code={scroll} class="my-0" />
+</Tabs>
+
+### Form
+
+Inputs in a sheet. `autoFocus` puts the caret in the first field on open; on a phone, `repositionInputs` (on by default) lifts a bottom drawer above the keyboard. Give fields `data-drawer-no-drag` so selecting text in them never starts a drag.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="form" client:only="solid" />
+  <CodeBlock slot="tab-1" code={form} class="my-0" />
+</Tabs>
+
+### Handle only
+
+With `handleOnly`, nothing in the content starts a drag - a slider, a carousel, a map keep their own gestures - and the handle is the only way to move the sheet.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="handleonly" client:only="solid" />
+  <CodeBlock slot="tab-1" code={handleOnly} class="my-0" />
+</Tabs>
+
+### Not dismissible
+
+`dismissible={false}` refuses the drag-to-close, Escape and the tap outside. `DrawerClose` always works, so give it a way out.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="nondismissible" client:only="solid" />
+  <CodeBlock slot="tab-1" code={nonDismissible} class="my-0" />
+</Tabs>
+
+### Nested drawers
+
+A `DrawerNested` inside another drawer's tree scales that drawer back as it opens, and follows its drag.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="nested" client:only="solid" />
+  <CodeBlock slot="tab-1" code={nested} class="my-0" />
+</Tabs>
+
+### Four edges
+
+`direction` is `"top"`, `"right"`, `"bottom"` or `"left"`. The component positions each; side drawers are 75% wide, capped at `sm:max-w-sm`.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="directions" client:only="solid" />
+  <CodeBlock slot="tab-1" code={directions} class="my-0" />
+</Tabs>
+
+### Non-modal
+
+No scrim, no focus trap, the page not pinned: the page underneath stays live.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="nonmodal" client:only="solid" />
+  <CodeBlock slot="tab-1" code={nonModal} class="my-0" />
+</Tabs>
+
+### Scaled background
+
+The element marked `data-drawer-wrapper` draws back behind a modal drawer, the way a phone does with its own sheets. `setBackgroundColorOnScale` (on by default) paints the body black behind it.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="scaled" client:only="solid" />
+  <CodeBlock slot="tab-1" code={scaled} class="my-0" />
+</Tabs>
+
+### Resize transition
+
+With `transitionResize`, a drawer whose content changes height animates to the new size instead of jumping.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="resize" client:only="solid" />
+  <CodeBlock slot="tab-1" code={resize} class="my-0" />
+</Tabs>
+
+### Dynamic height
+
+A floating sheet whose content changes between views. With `transitionResize` the drawer animates from one view's height to the next; the view's own entrance is a keyframe of yours.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="dynamic" client:only="solid" />
+  <CodeBlock slot="tab-1" code={dynamic} class="my-0" />
+</Tabs>
+
+### Controlled
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="controlled" client:only="solid" />
+  <CodeBlock slot="tab-1" code={controlled} class="my-0" />
+</Tabs>
+
+### Always visible
+
+A minimum height. Make the first snap point the height of the header and set `dismissible={false}`: a drag below it springs back, Escape and taps outside do nothing, and the header never leaves the screen. With `modal={false}` the page stays live under it - a player, a map's results, a cart. Give it its own close button.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="persistent" client:only="solid" />
+  <CodeBlock slot="tab-1" code={persistent} class="my-0" />
+</Tabs>
+
+### Inside a panel
+
+Give `container` an element and the drawer lives in it: the `Portal` mounts there and snap point fractions are of its size. Position the content `absolute` rather than `fixed`. The live sheet on the front page is one of these too.
+
+<Tabs tabs={["Preview", "Code"]}>
+  <DocsExample slot="tab-0" name="panel" client:only="solid" />
+  <CodeBlock slot="tab-1" code={panel} class="my-0" />
+</Tabs>
+
+## API reference
+
+### Root
+
+Everything is optional. `SnapPoint` is `number | string`: a fraction of the container, or a pixel length like `"320px"`.
+
+<PropsTable rows={rootProps} />
+
+### Parts
+
+The primitives, as `Drawer.*` from the package. The component above wraps them.
+
+- **`Root`** / **`NestedRoot`** - state. A `NestedRoot` inside another drawer's tree scales that drawer back as it opens and follows its drag.
+- **`Portal`** - into `container` or the body. Skip it for a drawer that stays inside its panel.
+- **`Overlay`** - opacity follows the drawer (solid from `fadeFromIndex`, fading below it). Position it yourself.
+- **`Content`** - `role="dialog"`, labelled by `Title`/`Description`, `touch-action: none`. Position it yourself.
+- **`Handle`** - a 44px tap target; a tap goes to the next snap point (or closes from the last), `preventCycle` turns that off.
+- **`Trigger`**, **`Close`**, **`Title`**, **`Description`** - take `as` to render as something else.
+
+Anything inside the content that scrolls should carry `touch-action: pan-y` (`pan-x` for a side drawer); mark things that must never start a drag with `data-drawer-no-drag`.
+
+### Data attributes
+
+To style against. The content carries all of these; the overlay and the handle carry `data-drawer-direction`.
+
+<PropsTable rows={dataAttributes} labels={["Attribute", "Value", ""]} columns={2} />
+
+### useDrawer, createDrawer
+
+<CodeBlock code={headless} lang="ts" />
+
+## Without Tailwind
+
+The primitives take any classes; there is nothing Tailwind about them. Position the overlay and the content, and style the edges from `data-drawer-direction`.
+
+<CodeBlock code={plainCss} />
+
+<CodeBlock code={plainCssStyles} lang="css" />
+
+## Coming from Vaul
+
+The props and parts have Vaul's names, so a Vaul drawer moves over as it is. What is different:
+
+- Snap point fractions are of the container (as Vaul) but the offset is computed from the drawer's own height, so `"320px"` shows exactly 320px whatever height the content has.
+- The gesture is heard on `window` from `pointerdown`, so a quick flick from the handle cannot escape the drawer before it counts.
+- `breakPoints`, `transitionResize`, `transitionState`, `openPercentage`, `translate`, `velocityThreshold`, `dampFunction`, `transitionDuration`/`transitionEasing` are additions.
+- Not ported: the 500ms "just opened" drag lock, `repositionInputs`' Firefox-on-Android special case, `noBodyStyles` splitting from `setBackgroundColorOnScale`.
+
+## Credits
+
+The API and feel follow [Vaul](https://vaul.emilkowal.ski). Break points, the resize transition and the readable transition state came from [corvu](https://corvu.dev/docs/primitives/drawer/). The styled component is a port of [shadcn/ui](https://ui.shadcn.com/docs/components/drawer)'s Drawer.
+
+## Contributing
+
+See [CONTRIBUTING.md](https://github.com/sinhong2011/solid-drawer/blob/main/CONTRIBUTING.md). Issues and pull requests are welcome. MIT.

@@ -1,10 +1,284 @@
 ---
 import Base from "../layouts/Base.astro";
-import Docs from "../content/docs.md";
+import Toc from "../components/Toc.astro";
+import Docs, { getHeadings } from "../content/docs.mdx";
+
+const headings = getHeadings().filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
-<Base title="Docs - solid-drawer">
-  <article class="prose">
-    <Docs />
-  </article>
+<Base title="Drawer - solid-drawer docs">
+  <div class="grid gap-x-10 gap-y-6 py-6 lg:grid-cols-[minmax(0,1fr)_13rem] lg:py-14" data-toc>
+    <!-- Narrow screens: a bar under the header that drops the rail over the page. -->
+    <div class="bg-background/85 sticky top-14 z-30 -mx-6 border-b backdrop-blur lg:hidden" data-toc-bar>
+      <button
+        type="button"
+        class="text-muted-foreground hover:text-foreground flex h-10 w-full items-center gap-3 px-6 text-sm"
+        data-toc-toggle
+        aria-expanded="false"
+        aria-controls="toc-panel"
+      >
+        <svg viewBox="0 0 24 24" class="size-4 shrink-0 -rotate-90" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" fill="none" stroke-width="2" class="stroke-foreground/15"></circle>
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+            fill="none"
+            stroke-width="2"
+            stroke-linecap="round"
+            class="stroke-brand transition-[stroke-dashoffset] duration-150"
+            pathLength="100"
+            stroke-dasharray="100"
+            stroke-dashoffset="100"
+            data-toc-progress
+          ></circle>
+        </svg>
+        <span class="text-foreground truncate" data-toc-current>On this page</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground ml-auto size-4 shrink-0 transition-transform" data-toc-chevron aria-hidden="true">
+          <path d="m6 9 6 6 6-6"></path>
+        </svg>
+      </button>
+      <div
+        id="toc-panel"
+        class="bg-background absolute inset-x-0 top-full max-h-[70vh] overflow-auto border-b px-6 py-4 shadow-xl"
+        data-toc-panel
+        hidden
+      >
+        <Toc headings={headings} />
+      </div>
+    </div>
+
+    <article class="prose max-w-[52rem] min-w-0">
+      <Docs />
+    </article>
+
+    <aside class="hidden lg:block">
+      <nav class="sticky top-24 flex max-h-[calc(100vh-8rem)] flex-col gap-3 text-sm" aria-label="On this page">
+        <h3 class="text-muted-foreground inline-flex items-center gap-1.5 text-sm font-normal tracking-normal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
+            <path d="M17 6.1H3M21 12.1H3M15.1 18H3"></path>
+          </svg>
+          On this page
+        </h3>
+        <div
+          class="relative min-h-0 flex-1 overflow-auto [mask-image:linear-gradient(to_bottom,transparent,white_16px,white_calc(100%-16px),transparent)] [scrollbar-width:none]"
+          data-toc-scroll
+        >
+          <Toc headings={headings} />
+        </div>
+      </nav>
+    </aside>
+  </div>
 </Base>
+
+<script>
+  let teardown: (() => void) | undefined;
+  document.addEventListener("astro:before-swap", () => teardown?.());
+  document.addEventListener("astro:page-load", () => {
+    teardown?.();
+    teardown = undefined;
+
+    // A copy button on every fenced block.
+    const clipboard =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path></svg>';
+    const check =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>';
+    for (const pre of document.querySelectorAll<HTMLPreElement>(".prose pre")) {
+      if (pre.closest("[data-copy-root]")) continue;
+      const wrap = document.createElement("div");
+      wrap.className = "relative [&>pre]:pr-14";
+      wrap.setAttribute("data-copy-root", "");
+      pre.replaceWith(wrap);
+      wrap.append(pre);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("aria-label", "Copy code");
+      button.className =
+        "bg-card/80 text-muted-foreground hover:bg-accent hover:text-foreground absolute top-2 right-2 grid size-8 place-items-center rounded-md border transition-colors";
+      button.innerHTML = clipboard;
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(pre.textContent ?? "");
+          button.innerHTML = check;
+        } catch {
+          button.textContent = "select it";
+        }
+        setTimeout(() => (button.innerHTML = clipboard), 1500);
+      });
+      wrap.append(button);
+    }
+
+    /*
+     * The rails. The same list is rendered twice - in the side column and in
+     * the drop-down for narrow screens - so everything below runs per list,
+     * from one reading of which headings are on screen.
+     */
+    const root = document.querySelector<HTMLElement>("[data-toc]");
+    if (!root) return;
+    const JOG = 8;
+    const x = (a: HTMLAnchorElement) => (a.dataset.depth === "3" ? 28 : 8);
+
+    type Rail = {
+      list: HTMLElement;
+      svg: SVGSVGElement;
+      line: SVGPathElement;
+      thumb: SVGPathElement;
+      dot: SVGCircleElement;
+      items: HTMLAnchorElement[];
+      scroller: HTMLElement | null;
+      total: number;
+      height: number;
+    };
+    const rails: Rail[] = [];
+    for (const list of root.querySelectorAll<HTMLElement>("[data-toc-list]")) {
+      const svg = list.querySelector<SVGSVGElement>("[data-toc-svg]");
+      const line = list.querySelector<SVGPathElement>("[data-toc-line]");
+      const thumb = list.querySelector<SVGPathElement>("[data-toc-thumb]");
+      const dot = list.querySelector<SVGCircleElement>("[data-toc-dot]");
+      if (!svg || !line || !thumb || !dot) continue;
+      rails.push({
+        list,
+        svg,
+        line,
+        thumb,
+        dot,
+        items: [...list.querySelectorAll<HTMLAnchorElement>("[data-toc-item]")],
+        scroller: list.closest<HTMLElement>("[data-toc-scroll]"),
+        total: 0,
+        height: 0,
+      });
+    }
+    if (!rails.length) return;
+    const heads = rails[0]!.items.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
+    if (!heads.every(Boolean)) return;
+    const targets = heads as HTMLElement[];
+
+    const build = (rail: Rail) => {
+      rail.height = rail.list.offsetHeight;
+      rail.svg.setAttribute("height", String(rail.height));
+      rail.svg.setAttribute("viewBox", `0 0 40 ${rail.height}`);
+      let d = "";
+      rail.items.forEach((a, i) => {
+        const cx = x(a);
+        const y0 = a.offsetTop;
+        const y1 = y0 + a.offsetHeight;
+        const prev = rail.items[i - 1];
+        const next = rail.items[i + 1];
+        if (i === 0) d += `M${cx} ${y0}`;
+        else if (prev && x(prev) !== cx) d += ` C${x(prev)} ${y0} ${cx} ${y0} ${cx} ${y0 + JOG}`;
+        d += ` L${cx} ${next && x(next) !== cx ? y1 - JOG : y1}`;
+      });
+      rail.line.setAttribute("d", d);
+      rail.thumb.setAttribute("d", d);
+      rail.total = rail.line.getTotalLength();
+    };
+
+    // The length along the line at which it passes a given y; the line only
+    // ever goes down, so a bisection finds it.
+    const lengthAt = (rail: Rail, y: number) => {
+      let lo = 0;
+      let hi = rail.total;
+      for (let i = 0; i < 24; i++) {
+        const mid = (lo + hi) / 2;
+        if (rail.line.getPointAtLength(mid).y < y) lo = mid;
+        else hi = mid;
+      }
+      return (lo + hi) / 2;
+    };
+
+    const paint = (rail: Rail, active: number[]) => {
+      if (rail.list.offsetHeight === 0) return; // in a closed drop-down
+      if (rail.list.offsetHeight !== rail.height) build(rail);
+      rail.items.forEach((a, i) => {
+        if (active.includes(i)) a.setAttribute("data-active", "true");
+        else a.removeAttribute("data-active");
+      });
+      const first = rail.items[active[0]!]!;
+      const last = rail.items[active[active.length - 1]!]!;
+      const from = lengthAt(rail, first.offsetTop + 2);
+      const to = lengthAt(rail, last.offsetTop + last.offsetHeight - 2);
+      rail.thumb.style.strokeDasharray = `${to - from} ${rail.total}`;
+      rail.thumb.style.strokeDashoffset = `${-from}`;
+      const point = rail.line.getPointAtLength(to);
+      rail.dot.style.cx = `${point.x}px`;
+      rail.dot.style.cy = `${point.y}px`;
+      // Keep the active run visible inside a scrolling rail.
+      const s = rail.scroller;
+      if (!s) return;
+      const top = first.offsetTop;
+      const bottom = last.offsetTop + last.offsetHeight;
+      if (top < s.scrollTop || bottom > s.scrollTop + s.clientHeight) {
+        s.scrollTo({ top: top - s.clientHeight / 2 + (bottom - top) / 2, behavior: "smooth" });
+      }
+    };
+
+    // The bar for narrow screens: progress, the current section, the drop-down.
+    const toggle = root.querySelector<HTMLButtonElement>("[data-toc-toggle]");
+    const panel = root.querySelector<HTMLElement>("[data-toc-panel]");
+    const current = root.querySelector<HTMLElement>("[data-toc-current]");
+    const progress = root.querySelector<SVGCircleElement>("[data-toc-progress]");
+    const chevron = root.querySelector<SVGElement>("[data-toc-chevron]");
+    let lastActive: number[] = [];
+    const setOpen = (open: boolean) => {
+      if (!panel || !toggle) return;
+      panel.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+      chevron?.classList.toggle("rotate-180", open);
+      if (open) for (const rail of rails) paint(rail, lastActive);
+    };
+    toggle?.addEventListener("click", () => setOpen(panel?.hidden ?? true));
+    panel?.addEventListener("click", (event) => {
+      if ((event.target as Element).closest("a")) setOpen(false);
+    });
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && panel && !panel.hidden) setOpen(false);
+    };
+    const onDown = (event: PointerEvent) => {
+      if (panel && !panel.hidden && !(event.target as Element).closest("[data-toc-bar]")) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+
+    let previous = "";
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      progress?.setAttribute("stroke-dashoffset", String(100 - Math.round((100 * window.scrollY) / Math.max(1, max))));
+
+      const viewTop = window.scrollY + 140;
+      const viewBottom = window.scrollY + window.innerHeight - 40;
+      const tops = targets.map((h) => h.getBoundingClientRect().top + window.scrollY);
+      const end = document.documentElement.scrollHeight;
+      const active: number[] = [];
+      for (let i = 0; i < targets.length; i++) {
+        const start = tops[i]!;
+        const stop = tops[i + 1] ?? end;
+        if (stop > viewTop && start < viewBottom) active.push(i);
+      }
+      if (!active.length) active.push(window.scrollY + window.innerHeight >= end ? targets.length - 1 : 0);
+      lastActive = active;
+
+      const key = active.join(",");
+      if (key === previous) return;
+      previous = key;
+      if (current) current.textContent = rails[0]!.items[active[0]!]!.textContent?.trim() ?? "";
+      for (const rail of rails) paint(rail, active);
+    };
+    const schedule = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    document.fonts?.ready.then(schedule);
+    for (const rail of rails) if (rail.list.offsetHeight) build(rail);
+    update();
+
+    teardown = () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  });
+</script>

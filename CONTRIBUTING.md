@@ -18,5 +18,11 @@ pnpm site:dev     # the demo and docs site, in site/
 
 ## Releasing
 
-1. Update `CHANGELOG.md` and bump `version` in `package.json`.
-2. `git tag vX.Y.Z && git push --tags` - the Release workflow publishes to npm with provenance.
+Releases are automated with [release-please](https://github.com/googleapis/release-please). Write commit messages (or squash-merge titles) as [conventional commits](https://www.conventionalcommits.org):
+
+- `fix: ...` - patch release
+- `feat: ...` - minor release
+- `feat!: ...` or a `BREAKING CHANGE:` footer - minor release while the version is below 1.0
+- `docs:`, `chore:`, `ci:`, `refactor:`, `test:` - no release, not in the changelog
+
+On every push to `main`, release-please keeps a `chore(main): release X.Y.Z` pull request open with the version bump and the `CHANGELOG.md` entry. Merging it tags the release and publishes to npm with provenance; nothing needs bumping by hand.

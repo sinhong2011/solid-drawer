@@ -1,0 +1,42 @@
+---
+/**
+ * The rail, after Fumadocs' clerk style: one line down the list that jogs
+ * sideways where the depth changes, drawn from the items' real positions by
+ * the script in docs.astro; the stretch beside the headings on screen is
+ * drawn again in the accent, with a dot at its end.
+ */
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+const { headings } = Astro.props;
+const line = (depth: number) => (depth <= 2 ? 8 : 28);
+const text = (depth: number) => line(depth) + 16;
+---
+
+<div class="relative flex flex-col" data-toc-list>
+  <svg class="pointer-events-none absolute top-0 left-0 w-10 overflow-visible" data-toc-svg aria-hidden="true">
+    <path class="stroke-foreground/10" fill="none" stroke-width="1" data-toc-line></path>
+    <path
+      class="stroke-brand transition-[stroke-dasharray,stroke-dashoffset] duration-300 ease-out"
+      fill="none"
+      stroke-width="1.5"
+      data-toc-thumb
+    ></path>
+    <circle class="fill-brand transition-[cx,cy] duration-300 ease-out" r="3" data-toc-dot></circle>
+  </svg>
+  {
+    headings.map((h) => (
+      <a
+        href={`#${h.slug}`}
+        data-toc-item
+        data-depth={h.depth}
+        class="text-muted-foreground hover:text-foreground data-[active=true]:text-brand py-1.5 text-sm transition-colors wrap-anywhere first:pt-0 last:pb-0"
+        style={`padding-inline-start: ${text(h.depth)}px`}
+      >
+        {h.text}
+      </a>
+    ))
+  }
+</div>

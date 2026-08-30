@@ -8,10 +8,20 @@
     "preview": "astro preview"
   },
   "dependencies": {
+    "@astrojs/mdx": "^7.0.8",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
     "@sinhong2011/solid-drawer": "workspace:*",
     "@solidjs/web": "2.0.0-rc.4",
     "astro": "^7.2.9",
+    "clsx": "^2.1.1",
     "solid-js": "2.0.0-rc.4",
+    "tailwind-merge": "^3.6.0",
     "vite-plugin-solid": "3.0.0-next.27"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3"
   }
 }

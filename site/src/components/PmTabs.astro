@@ -1,0 +1,64 @@
+---
+/**
+ * The install command, once per package manager, in one card: the tabs are
+ * the card's header, the command its body. Every PmTabs on a page changes
+ * together and the choice is remembered.
+ */
+import { Code } from "astro:components";
+
+interface Props {
+  pkg: string;
+  dev?: boolean;
+  class?: string;
+}
+const { pkg, dev = false, class: className } = Astro.props;
+const commands: [string, string][] = [
+  ["pnpm", `pnpm add ${dev ? "-D " : ""}${pkg}`],
+  ["npm", `npm install ${dev ? "-D " : ""}${pkg}`],
+  ["yarn", `yarn add ${dev ? "-D " : ""}${pkg}`],
+  ["bun", `bun add ${dev ? "-d " : ""}${pkg}`],
+];
+---
+
+<div data-tabs data-tabs-group="pm" class:list={["bg-card my-4 overflow-hidden rounded-lg border", className]}>
+  <div role="tablist" class="bg-muted/50 flex items-center gap-4 border-b px-4">
+    {
+      commands.map(([pm], i) => (
+        <button
+          role="tab"
+          type="button"
+          aria-selected={i === 0 ? "true" : "false"}
+          data-state={i === 0 ? "active" : "inactive"}
+          data-tab={pm}
+          class="text-muted-foreground hover:text-foreground data-[state=active]:border-brand data-[state=active]:text-brand -mb-px border-b-2 border-transparent py-2 font-mono text-sm transition-colors"
+        >
+          {pm}
+        </button>
+      ))
+    }
+  </div>
+  {
+    commands.map(([, command], i) => (
+      <div role="tabpanel" hidden={i !== 0} class="relative" data-copy-root>
+        <Code
+          code={command}
+          lang="bash"
+          themes={{ light: "github-light", dark: "github-dark" }}
+          defaultColor={false}
+          class="overflow-x-auto px-4 py-3.5 pr-12 text-[0.84rem] leading-relaxed"
+        />
+        <button
+          type="button"
+          data-copy
+          class="text-muted-foreground hover:bg-accent hover:text-foreground absolute top-1/2 right-2.5 grid size-8 -translate-y-1/2 place-items-center rounded-md transition-colors"
+          aria-label="Copy command"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          </svg>
+        </button>
+      </div>
+    ))
+  }
+</div>
