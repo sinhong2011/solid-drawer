@@ -45,9 +45,10 @@ function solid2() {
 }
 
 export default defineConfig({
-  // Served from the root: home is `/`, the docs `/docs`. Links are built from
-  // `import.meta.env.BASE_URL`, so a base can be put back here if needed.
+  // A project site on GitHub Pages: home is `/solid-drawer/`, the docs
+  // `/solid-drawer/docs`. Links are built from `import.meta.env.BASE_URL`.
   site: "https://sinhong2011.github.io",
+  base: "/solid-drawer",
   integrations: [solid2(), mdx()],
   markdown: {
     // Both themes are emitted; the site's CSS picks one by the page's theme.
