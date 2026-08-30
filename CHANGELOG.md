@@ -5,7 +5,6 @@
 
 ### Bug Fixes
 
-* keep a resize from swallowing the close transition ([646a1c6](https://github.com/sinhong2011/solid-drawer/commit/646a1c69522e29165463c3e28791477d9b35dc12))
 * keep a resize from swallowing the close transition ([d472d46](https://github.com/sinhong2011/solid-drawer/commit/d472d4604dd57d5bfddcaa1460c41acd6fbf37ec))
 
 ## [0.1.1](https://github.com/sinhong2011/solid-drawer/compare/v0.1.0...v0.1.1) (2026-08-30)
