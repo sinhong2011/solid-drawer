@@ -1,0 +1,90 @@
+/*
+ * Optional. The drawer moves itself with inline styles; this is the look of
+ * the handle, the tap target around it, and the background that runs on past
+ * the drawer's far edge so a pull past open shows the drawer and not the page.
+ */
+
+[data-drawer-content] {
+  will-change: transform;
+}
+
+[data-drawer-content][data-drawer-direction="bottom"]::after,
+[data-drawer-content][data-drawer-direction="top"]::after,
+[data-drawer-content][data-drawer-direction="left"]::after,
+[data-drawer-content][data-drawer-direction="right"]::after {
+  content: "";
+  position: absolute;
+  background: inherit;
+  background-color: inherit;
+  pointer-events: none;
+}
+[data-drawer-content][data-drawer-direction="bottom"]::after {
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 200%;
+}
+[data-drawer-content][data-drawer-direction="top"]::after {
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: 200%;
+}
+[data-drawer-content][data-drawer-direction="left"]::after {
+  right: 100%;
+  top: 0;
+  bottom: 0;
+  width: 200%;
+}
+[data-drawer-content][data-drawer-direction="right"]::after {
+  left: 100%;
+  top: 0;
+  bottom: 0;
+  width: 200%;
+}
+
+[data-drawer-handle] {
+  display: block;
+  position: relative;
+  opacity: 0.7;
+  background: #e2e2e4;
+  margin-left: auto;
+  margin-right: auto;
+  height: 5px;
+  width: 32px;
+  border-radius: 1rem;
+  touch-action: none;
+  cursor: grab;
+}
+[data-drawer-handle][data-drawer-direction="left"],
+[data-drawer-handle][data-drawer-direction="right"] {
+  height: 32px;
+  width: 5px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+[data-drawer-handle]:active {
+  opacity: 1;
+  cursor: grabbing;
+}
+@media (hover: hover) and (pointer: fine) {
+  [data-drawer-handle]:hover {
+    opacity: 1;
+  }
+}
+
+[data-drawer-handle-hitarea] {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100%, 2.75rem);
+  height: max(100%, 2.75rem);
+  touch-action: inherit;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-drawer-handle] {
+    background: #494949;
+  }
+}
