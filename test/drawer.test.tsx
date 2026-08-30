@@ -405,6 +405,41 @@ describe("Drawer", () => {
     expect(content()?.style.transform).toBe("translate3d(600px, 0, 0)");
   });
 
+  it("gives back the consumer's inline max-height after repositioning for the keyboard", async () => {
+    // A visual viewport the effect can listen to; jsdom has none.
+    const viewport = new EventTarget() as EventTarget & { height: number };
+    viewport.height = WINDOW;
+    Object.defineProperty(window, "visualViewport", { value: viewport, configurable: true });
+    const [open, setOpen] = createSignal(true);
+    mount(() => (
+      <Drawer.Root open={open()} onOpenChange={setOpen} transitionDuration={10}>
+        <Drawer.Content style={{ "max-height": "86%", bottom: "0px" }} />
+      </Drawer.Root>
+    ));
+    await tick();
+    const el = content() as HTMLElement;
+    expect(el.style.maxHeight).toBe("86%");
+
+    // No keyboard: the first resize used to blank the inline values (#9).
+    viewport.dispatchEvent(new Event("resize"));
+    expect(el.style.maxHeight).toBe("86%");
+    expect(el.style.bottom).toBe("0px");
+
+    // Keyboard up: lifted and capped; keyboard down: the consumer's values again.
+    viewport.height = WINDOW - 300;
+    viewport.dispatchEvent(new Event("resize"));
+    expect(el.style.bottom).toBe("300px");
+    expect(el.style.maxHeight).not.toBe("86%");
+    viewport.height = WINDOW;
+    viewport.dispatchEvent(new Event("resize"));
+    expect(el.style.maxHeight).toBe("86%");
+    expect(el.style.bottom).toBe("0px");
+
+    setOpen(false);
+    await tick();
+    Object.defineProperty(window, "visualViewport", { value: null, configurable: true });
+  });
+
   it("still leaves when its content changes size on the way out", async () => {
     // jsdom has no ResizeObserver; one that is fired by hand stands in.
     const callbacks: (() => void)[] = [];
