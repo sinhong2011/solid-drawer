@@ -193,7 +193,12 @@ describe("Drawer", () => {
     // so without care a press in the nested content would start a drag on
     // the drawer it is in as well.
     mount(() => (
-      <Drawer.Root open snapPoints={[0.5, 0.9]} defaultActiveSnapPoint={0.9} transitionDuration={10}>
+      <Drawer.Root
+        open
+        snapPoints={[0.5, 0.9]}
+        defaultActiveSnapPoint={0.9}
+        transitionDuration={10}
+      >
         <Drawer.Content data-outer="">
           <Drawer.NestedRoot open transitionDuration={10}>
             <Drawer.Portal>
