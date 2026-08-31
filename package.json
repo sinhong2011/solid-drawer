@@ -1,6 +1,6 @@
 {
   "name": "@sinhong2011/solid-drawer",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A drawer for Solid 2. Snap points, flings, scroll arbitration, nested drawers, a handle that cycles, the page scaling back behind it, and state you can read.",
   "keywords": [
     "bottom-sheet",
