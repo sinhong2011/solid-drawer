@@ -1,4 +1,5 @@
 import { For, Show, createSignal } from "solid-js";
+import { Portal } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";
 import {
   Drawer as Primitive,
@@ -44,7 +45,7 @@ export function HeroDemo() {
           </div>
           <h4 class="mb-4 text-[1.35rem] tracking-[-0.03em]">Library</h4>
           <div class="[mask-image:linear-gradient(to_bottom,black_55%,transparent_95%)]">
-            <For each={[72, 58, 80, 64, 50, 70, 60]}>
+            <For each={[72, 58, 80, 64, 50, 70, 60, 76, 62]}>
               {(width, i) => (
                 <div class="mb-3 grid grid-cols-[2.25rem_1fr] items-center gap-3">
                   <i class="bg-border block h-9 rounded-lg" />
@@ -86,7 +87,7 @@ export function HeroDemo() {
           </Primitive.Portal>
           <Ruler />
           <Readout />
-          <Reopen />
+          <Reopen frame={frame()!} />
         </Primitive.Root>
       </Show>
     </div>
@@ -202,30 +203,35 @@ function Readout() {
   );
 }
 
-function Reopen() {
+/* The trigger is portaled into the phone frame itself so it centers on the
+   phone, not on its grid track - the readout row widens the track past the
+   frame, which used to push a track-centered button off the phone's axis. */
+function Reopen(props: { frame: HTMLElement }) {
   const drawer = useDrawer();
   return (
     <Show when={!drawer.mounted()}>
-      <Primitive.Trigger
-        class={buttonVariants({
-          variant: "brand",
-          class:
-            "animate-view-in z-10 mb-7 h-10 gap-2 self-end justify-self-center rounded-full px-4 [grid-area:frame]",
-        })}
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
+      <Portal mount={props.frame}>
+        <Primitive.Trigger
+          class={buttonVariants({
+            variant: "brand",
+            class:
+              "animate-view-in absolute inset-x-0 bottom-9 z-10 mx-auto h-11 w-fit gap-2 rounded-full px-5",
+          })}
         >
-          <path d="m18 15-6-6-6 6" />
-        </svg>
-        Open the sheet
-      </Primitive.Trigger>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m18 15-6-6-6 6" />
+          </svg>
+          Open the sheet
+        </Primitive.Trigger>
+      </Portal>
     </Show>
   );
 }
@@ -842,7 +848,11 @@ function Persistent() {
           </div>
           <button
             type="button"
-            class={buttonVariants({ variant: "outline", size: "icon-sm", class: "rounded-full" })}
+            class={buttonVariants({
+              variant: "outline",
+              size: "icon-sm",
+              class: "rounded-full",
+            })}
             onClick={() => setPlaying((p) => !p)}
             aria-label={playing() ? "Pause" : "Play"}
             data-drawer-no-drag
@@ -959,7 +969,9 @@ function PanelReopen() {
   return (
     <Show when={!drawer.mounted()}>
       <Primitive.Trigger
-        class={buttonVariants({ class: "absolute bottom-4 left-1/2 -translate-x-1/2" })}
+        class={buttonVariants({
+          class: "absolute bottom-4 left-1/2 -translate-x-1/2",
+        })}
       >
         Show nearby
       </Primitive.Trigger>

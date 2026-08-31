@@ -188,6 +188,39 @@ describe("Drawer", () => {
     scrollTo.mockRestore();
   });
 
+  it("a drag on a nested drawer is that drawer's alone", async () => {
+    // Solid delegates pointer events up the component tree, through portals,
+    // so without care a press in the nested content would start a drag on
+    // the drawer it is in as well.
+    mount(() => (
+      <Drawer.Root
+        open
+        snapPoints={[0.5, 0.9]}
+        defaultActiveSnapPoint={0.9}
+        transitionDuration={10}
+      >
+        <Drawer.Content data-outer="">
+          <Drawer.NestedRoot open transitionDuration={10}>
+            <Drawer.Portal>
+              <Drawer.Content data-inner="" />
+            </Drawer.Portal>
+          </Drawer.NestedRoot>
+        </Drawer.Content>
+      </Drawer.Root>
+    ));
+    await tick();
+    const outer = document.querySelector<HTMLElement>("[data-outer]") as HTMLElement;
+    const inner = document.querySelector<HTMLElement>("[data-inner]") as HTMLElement;
+    pointer("pointerdown", inner, 500);
+    pointer("pointermove", window, 560);
+    pointer("pointermove", window, 640);
+    flush();
+    expect(inner.hasAttribute("data-dragging")).toBe(true);
+    expect(outer.hasAttribute("data-dragging")).toBe(false);
+    pointer("pointerup", window, 640);
+    flush();
+  });
+
   it("opens at the first snap point and rests at the one it is pulled to", async () => {
     const changes: (SnapPoint | null)[] = [];
     mount(() => (
