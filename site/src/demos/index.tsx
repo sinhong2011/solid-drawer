@@ -1,4 +1,5 @@
 import { For, Show, createSignal } from "solid-js";
+import { Portal } from "@solidjs/web";
 import type { JSX } from "@solidjs/web";
 import {
   Drawer as Primitive,
@@ -37,19 +38,25 @@ export function HeroDemo() {
         class="border-bezel bg-secondary relative h-[564px] w-[292px] touch-none overflow-hidden rounded-[42px] border-8 shadow-[0_30px_60px_-30px_rgb(0_0_0/0.45)] [grid-area:frame] max-[26rem]:h-[calc((100vw-8.5rem)*1.93)] max-[26rem]:w-[calc(100vw-8.5rem)]"
         ref={setFrame}
       >
-        <div class="from-card to-secondary absolute inset-0 bg-linear-to-b p-4" aria-hidden="true">
+        <div
+          class="from-card to-secondary absolute inset-0 bg-linear-to-b p-4"
+          aria-hidden="true"
+        >
           <div class="text-muted-foreground mb-6 flex justify-between font-mono text-[0.7rem]">
             <span>09:41</span>
             <span>●●●</span>
           </div>
           <h4 class="mb-4 text-[1.35rem] tracking-[-0.03em]">Library</h4>
           <div class="[mask-image:linear-gradient(to_bottom,black_55%,transparent_95%)]">
-            <For each={[72, 58, 80, 64, 50, 70, 60]}>
+            <For each={[72, 58, 80, 64, 50, 70, 60, 76, 62]}>
               {(width, i) => (
                 <div class="mb-3 grid grid-cols-[2.25rem_1fr] items-center gap-3">
                   <i class="bg-border block h-9 rounded-lg" />
                   <div>
-                    <b class="bg-border block h-2 rounded-sm" style={{ width: `${width}%` }} />
+                    <b
+                      class="bg-border block h-2 rounded-sm"
+                      style={{ width: `${width}%` }}
+                    />
                     <b
                       class="bg-border mt-1.5 block h-2 rounded-sm opacity-60"
                       style={{ width: `${width - 25 + (i() % 3) * 5}%` }}
@@ -77,16 +84,19 @@ export function HeroDemo() {
               aria-label="Live demo drawer"
             >
               <Primitive.Handle class="bg-muted-foreground/30 mx-auto mt-2.5 mb-3 opacity-100" />
-              <Primitive.Title class="text-[1.05rem] font-semibold">Snap points</Primitive.Title>
+              <Primitive.Title class="text-[1.05rem] font-semibold">
+                Snap points
+              </Primitive.Title>
               <Primitive.Description class="text-muted-foreground mt-0.5 mb-3 text-sm">
-                Three rest positions. Drag between them, or tap the handle to step.
+                Three rest positions. Drag between them, or tap the handle to
+                step.
               </Primitive.Description>
               <HeroSnapList />
             </Primitive.Content>
           </Primitive.Portal>
           <Ruler />
           <Readout />
-          <Reopen />
+          <Reopen frame={frame()!} />
         </Primitive.Root>
       </Show>
     </div>
@@ -143,7 +153,9 @@ function Ruler() {
             class="border-input data-[active]:text-foreground absolute left-0 h-0 w-3 border-t"
             style={{ bottom: `${tick.px}px` }}
             data-active={
-              drawer.mounted() && drawer.activeSnapPoint() === tick.point ? "" : undefined
+              drawer.mounted() && drawer.activeSnapPoint() === tick.point
+                ? ""
+                : undefined
             }
           >
             <span class="absolute -top-[0.65em] left-4 whitespace-nowrap">
@@ -195,37 +207,44 @@ function Readout() {
       <div class={cell}>
         <small class={label}>transitionState()</small>
         <strong class={value} data-live={moving() ? "" : undefined}>
-          {drawer.isDragging() ? "dragging" : (drawer.transitionState() ?? "null")}
+          {drawer.isDragging()
+            ? "dragging"
+            : (drawer.transitionState() ?? "null")}
         </strong>
       </div>
     </div>
   );
 }
 
-function Reopen() {
+/* The trigger is portaled into the phone frame itself so it centers on the
+   phone, not on its grid track - the readout row widens the track past the
+   frame, which used to push a track-centered button off the phone's axis. */
+function Reopen(props: { frame: HTMLElement }) {
   const drawer = useDrawer();
   return (
     <Show when={!drawer.mounted()}>
-      <Primitive.Trigger
-        class={buttonVariants({
-          variant: "brand",
-          class:
-            "animate-view-in z-10 mb-7 h-10 gap-2 self-end justify-self-center rounded-full px-4 [grid-area:frame]",
-        })}
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
+      <Portal mount={props.frame}>
+        <Primitive.Trigger
+          class={buttonVariants({
+            variant: "brand",
+            class:
+              "animate-view-in absolute inset-x-0 bottom-9 z-10 mx-auto h-11 w-fit gap-2 rounded-full px-5",
+          })}
         >
-          <path d="m18 15-6-6-6 6" />
-        </svg>
-        Open the sheet
-      </Primitive.Trigger>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m18 15-6-6-6 6" />
+          </svg>
+          Open the sheet
+        </Primitive.Trigger>
+      </Portal>
     </Show>
   );
 }
@@ -252,7 +271,9 @@ function Sheet(props: {
       {props.children}
       <DrawerFooter>
         {props.footer}
-        <DrawerClose class={buttonVariants({ variant: "outline" })}>Close</DrawerClose>
+        <DrawerClose class={buttonVariants({ variant: "outline" })}>
+          Close
+        </DrawerClose>
       </DrawerFooter>
     </DrawerContent>
   );
@@ -271,11 +292,14 @@ function Basic() {
   return (
     <Drawer>
       <Open />
-      <Sheet title="A drawer" description="Drag it down to close, or fling it. Escape works too.">
+      <Sheet
+        title="A drawer"
+        description="Drag it down to close, or fling it. Escape works too."
+      >
         <div class={body}>
           <p>
-            Nothing here is styled by the library except the handle. The sheet is a{" "}
-            <code>position: fixed</code> box; the drawer only moves it.
+            Nothing here is styled by the library except the handle. The sheet
+            is a <code>position: fixed</code> box; the drawer only moves it.
           </p>
         </div>
       </Sheet>
@@ -308,9 +332,9 @@ function SnapPoints() {
         <div class={body}>
           <SnapReadout />
           <p>
-            A number is a fraction of the container, a string is pixels; both say how much of the
-            drawer shows. The scrim only fades in below the last one, because of{" "}
-            <code>fadeFromIndex</code>.
+            A number is a fraction of the container, a string is pixels; both
+            say how much of the drawer shows. The scrim only fades in below the
+            last one, because of <code>fadeFromIndex</code>.
           </p>
         </div>
       </Sheet>
@@ -364,8 +388,8 @@ function Nested() {
       >
         <div class={body}>
           <p>
-            A <code>DrawerNested</code> inside another drawer's tree scales that drawer back as it
-            opens and follows its drag.
+            A <code>DrawerNested</code> inside another drawer's tree scales that
+            drawer back as it opens and follows its drag.
           </p>
         </div>
       </Sheet>
@@ -380,14 +404,20 @@ function Directions() {
     <For each={DIRECTIONS}>
       {(direction) => (
         <Drawer direction={direction}>
-          <DrawerTrigger class={buttonVariants({ variant: "outline", size: "sm" })}>
+          <DrawerTrigger
+            class={buttonVariants({ variant: "outline", size: "sm" })}
+          >
             {direction}
           </DrawerTrigger>
-          <Sheet title={`From the ${direction}`} description={`direction="${direction}"`}>
+          <Sheet
+            title={`From the ${direction}`}
+            description={`direction="${direction}"`}
+          >
             <div class={body}>
               <p>
-                The same gesture, turned to the edge. A side drawer's content that scrolls should
-                carry <code>touch-action: pan-x</code> instead of <code>pan-y</code>.
+                The same gesture, turned to the edge. A side drawer's content
+                that scrolls should carry <code>touch-action: pan-x</code>{" "}
+                instead of <code>pan-y</code>.
               </p>
             </div>
           </Sheet>
@@ -419,8 +449,9 @@ function Scaled() {
       >
         <div class={body}>
           <p>
-            As iOS does with its own sheets. <code>setBackgroundColorOnScale</code> paints the body
-            black behind it so the corners have something to round against.
+            As iOS does with its own sheets.{" "}
+            <code>setBackgroundColorOnScale</code> paints the body black behind
+            it so the corners have something to round against.
           </p>
         </div>
       </Sheet>
@@ -437,20 +468,26 @@ function Resize() {
         title="Resize transition"
         description="When the content changes height, the drawer animates to the new size."
         footer={
-          <button type="button" class={buttonVariants()} onClick={() => setMore((m) => !m)}>
+          <button
+            type="button"
+            class={buttonVariants()}
+            onClick={() => setMore((m) => !m)}
+          >
             {more() ? "Show less" : "Show more"}
           </button>
         }
       >
         <div class={body}>
           <p>
-            Without <code>transitionResize</code> a sheet jumps when a step of a form appears. With
-            it, the bottom edge stays put and the top edge moves.
+            Without <code>transitionResize</code> a sheet jumps when a step of a
+            form appears. With it, the bottom edge stays put and the top edge
+            moves.
           </p>
           <Show when={more()}>
             <p>
-              This paragraph was added after the drawer opened, and the drawer grew to fit it rather
-              than snapping. Press the button again and it shrinks back the same way.
+              This paragraph was added after the drawer opened, and the drawer
+              grew to fit it rather than snapping. Press the button again and it
+              shrinks back the same way.
             </p>
             <p>The transition uses the same duration and easing as a settle.</p>
           </Show>
@@ -489,7 +526,10 @@ function Dynamic() {
     </Primitive.Close>
   );
   return (
-    <Primitive.Root transitionResize onAnimationEnd={(open) => !open && setView("options")}>
+    <Primitive.Root
+      transitionResize
+      onAnimationEnd={(open) => !open && setView("options")}
+    >
       <Open />
       <Primitive.Portal>
         <Primitive.Overlay class="fixed inset-0 z-50 bg-black/50" />
@@ -506,7 +546,11 @@ function Dynamic() {
                 <Close />
               </div>
               <div class="grid gap-3">
-                <button type="button" class={row} onClick={() => setView("key")}>
+                <button
+                  type="button"
+                  class={row}
+                  onClick={() => setView("key")}
+                >
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -522,7 +566,11 @@ function Dynamic() {
                   </svg>
                   View Private Key
                 </button>
-                <button type="button" class={row} onClick={() => setView("key")}>
+                <button
+                  type="button"
+                  class={row}
+                  onClick={() => setView("key")}
+                >
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -573,8 +621,8 @@ function Dynamic() {
                 <Close />
               </div>
               <Primitive.Description class="text-muted-foreground mb-4 text-[15px]">
-                Your private key is the only way to recover your wallet. Keep it somewhere safe and
-                never share it.
+                Your private key is the only way to recover your wallet. Keep it
+                somewhere safe and never share it.
               </Primitive.Description>
               <div class="bg-secondary mb-4 rounded-2xl p-4 font-mono text-sm break-all">
                 0x4f3a9c1e7b2d8f0a5c6e1b9d3a7f2c8e4b0d6a1f9c3e5b7d2a8f4c0e6b1d3a9f
@@ -607,7 +655,8 @@ function Dynamic() {
                 <Close />
               </div>
               <Primitive.Description class="text-muted-foreground mb-4 text-[15px]">
-                You have not backed up your wallet. Removing it now loses it for good.
+                You have not backed up your wallet. Removing it now loses it for
+                good.
               </Primitive.Description>
               <div class="grid grid-cols-2 gap-3">
                 <button
@@ -618,7 +667,10 @@ function Dynamic() {
                   Cancel
                 </button>
                 <Primitive.Close
-                  class={cn(row, "justify-center bg-red-600 text-white hover:bg-red-700")}
+                  class={cn(
+                    row,
+                    "justify-center bg-red-600 text-white hover:bg-red-700",
+                  )}
                 >
                   Remove
                 </Primitive.Close>
@@ -697,7 +749,10 @@ function FormDemo() {
     <Drawer autoFocus>
       <Open />
       <DrawerContent>
-        <form class="mx-auto w-full max-w-sm" onSubmit={(event) => event.preventDefault()}>
+        <form
+          class="mx-auto w-full max-w-sm"
+          onSubmit={(event) => event.preventDefault()}
+        >
           <DrawerHeader>
             <DrawerTitle>Edit profile</DrawerTitle>
             <DrawerDescription>
@@ -715,14 +770,19 @@ function FormDemo() {
             </label>
             <label class="grid gap-1.5 text-sm font-medium">
               Bio
-              <textarea class={`${field} h-20 resize-none py-2`} data-drawer-no-drag>
+              <textarea
+                class={`${field} h-20 resize-none py-2`}
+                data-drawer-no-drag
+              >
                 Builds sheets that snap.
               </textarea>
             </label>
           </div>
           <DrawerFooter>
             <DrawerClose class={buttonVariants()}>Save changes</DrawerClose>
-            <DrawerClose class={buttonVariants({ variant: "outline" })}>Cancel</DrawerClose>
+            <DrawerClose class={buttonVariants({ variant: "outline" })}>
+              Cancel
+            </DrawerClose>
           </DrawerFooter>
         </form>
       </DrawerContent>
@@ -734,7 +794,16 @@ function FormDemo() {
    chips that scrolls sideways - keeps its own gestures. */
 function HandleOnly() {
   const [value, setValue] = createSignal(40);
-  const chips = ["Pop", "Hip-hop", "Jazz", "Ambient", "Classical", "Techno", "Folk", "Soul"];
+  const chips = [
+    "Pop",
+    "Hip-hop",
+    "Jazz",
+    "Ambient",
+    "Classical",
+    "Techno",
+    "Folk",
+    "Soul",
+  ];
   return (
     <Drawer handleOnly>
       <Open />
@@ -743,13 +812,17 @@ function HandleOnly() {
           <DrawerHeader>
             <DrawerTitle>Handle only</DrawerTitle>
             <DrawerDescription>
-              Drag the bar at the top. The slider and the chips are yours to move.
+              Drag the bar at the top. The slider and the chips are yours to
+              move.
             </DrawerDescription>
           </DrawerHeader>
           <div class="grid gap-5 px-4">
             <label class="grid gap-2 text-sm font-medium">
               <span class="flex justify-between">
-                Volume <span class="text-muted-foreground font-mono tabular-nums">{value()}</span>
+                Volume{" "}
+                <span class="text-muted-foreground font-mono tabular-nums">
+                  {value()}
+                </span>
               </span>
               <input
                 type="range"
@@ -778,7 +851,9 @@ function HandleOnly() {
             </div>
           </div>
           <DrawerFooter>
-            <DrawerClose class={buttonVariants({ variant: "outline" })}>Close</DrawerClose>
+            <DrawerClose class={buttonVariants({ variant: "outline" })}>
+              Close
+            </DrawerClose>
           </DrawerFooter>
         </div>
       </DrawerContent>
@@ -796,8 +871,8 @@ function NotDismissible() {
           <DrawerHeader>
             <DrawerTitle>Update required</DrawerTitle>
             <DrawerDescription>
-              Try dragging it down, pressing Escape, or tapping the page: nothing.{" "}
-              <code>DrawerClose</code> still works.
+              Try dragging it down, pressing Escape, or tapping the page:
+              nothing. <code>DrawerClose</code> still works.
             </DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
@@ -835,14 +910,20 @@ function Persistent() {
             aria-hidden="true"
           />
           <div class="min-w-0 flex-1">
-            <DrawerTitle class="truncate text-sm">Now playing · Weightless</DrawerTitle>
+            <DrawerTitle class="truncate text-sm">
+              Now playing · Weightless
+            </DrawerTitle>
             <DrawerDescription class="truncate text-xs">
               Marconi Union · drag up for the queue
             </DrawerDescription>
           </div>
           <button
             type="button"
-            class={buttonVariants({ variant: "outline", size: "icon-sm", class: "rounded-full" })}
+            class={buttonVariants({
+              variant: "outline",
+              size: "icon-sm",
+              class: "rounded-full",
+            })}
             onClick={() => setPlaying((p) => !p)}
             aria-label={playing() ? "Pause" : "Play"}
             data-drawer-no-drag
@@ -883,7 +964,9 @@ function Persistent() {
           <For each={queue}>
             {(track, i) => (
               <div class="flex items-center gap-3 border-b py-2.5 text-sm">
-                <span class="text-muted-foreground w-5 font-mono text-xs">{i() + 1}</span>
+                <span class="text-muted-foreground w-5 font-mono text-xs">
+                  {i() + 1}
+                </span>
                 {track}
               </div>
             )}
@@ -931,7 +1014,9 @@ function Panel() {
               aria-label="Nearby places"
             >
               <Primitive.Handle class="bg-muted-foreground/30 mx-auto mt-3 mb-2 opacity-100" />
-              <Primitive.Title class="px-4 text-base font-semibold">Nearby</Primitive.Title>
+              <Primitive.Title class="px-4 text-base font-semibold">
+                Nearby
+              </Primitive.Title>
               <Primitive.Description class="text-muted-foreground px-4 text-xs">
                 88px, half, and 90% of the panel. Tap the handle to step.
               </Primitive.Description>
@@ -940,7 +1025,9 @@ function Panel() {
                   {([name, distance]) => (
                     <div class="flex items-center justify-between border-t py-2.5 text-sm">
                       <span>{name}</span>
-                      <span class="text-muted-foreground font-mono text-xs">{distance}</span>
+                      <span class="text-muted-foreground font-mono text-xs">
+                        {distance}
+                      </span>
                     </div>
                   )}
                 </For>
@@ -959,7 +1046,9 @@ function PanelReopen() {
   return (
     <Show when={!drawer.mounted()}>
       <Primitive.Trigger
-        class={buttonVariants({ class: "absolute bottom-4 left-1/2 -translate-x-1/2" })}
+        class={buttonVariants({
+          class: "absolute bottom-4 left-1/2 -translate-x-1/2",
+        })}
       >
         Show nearby
       </Primitive.Trigger>
@@ -970,8 +1059,11 @@ function PanelReopen() {
 /* shadcn/ui's own drawer example, so the docs' preview is the familiar one. */
 export function DocsPreview() {
   const [goal, setGoal] = createSignal(350);
-  const adjust = (by: number) => setGoal((g) => Math.max(200, Math.min(400, g + by)));
-  const bars = [400, 300, 200, 300, 200, 278, 189, 239, 300, 200, 278, 189, 349];
+  const adjust = (by: number) =>
+    setGoal((g) => Math.max(200, Math.min(400, g + by)));
+  const bars = [
+    400, 300, 200, 300, 200, 278, 189, 239, 300, 200, 278, 189, 349,
+  ];
   const round = buttonVariants({
     variant: "outline",
     size: "icon",
@@ -979,7 +1071,9 @@ export function DocsPreview() {
   });
   return (
     <Drawer>
-      <DrawerTrigger class={buttonVariants({ variant: "outline" })}>Open Drawer</DrawerTrigger>
+      <DrawerTrigger class={buttonVariants({ variant: "outline" })}>
+        Open Drawer
+      </DrawerTrigger>
       <DrawerContent>
         <div class="mx-auto w-full max-w-sm">
           <DrawerHeader>
@@ -998,8 +1092,12 @@ export function DocsPreview() {
                 −
               </button>
               <div class="flex-1 text-center">
-                <div class="text-7xl font-bold tracking-tighter tabular-nums">{goal()}</div>
-                <div class="text-muted-foreground text-[0.7rem] uppercase">Calories/day</div>
+                <div class="text-7xl font-bold tracking-tighter tabular-nums">
+                  {goal()}
+                </div>
+                <div class="text-muted-foreground text-[0.7rem] uppercase">
+                  Calories/day
+                </div>
               </div>
               <button
                 type="button"
@@ -1024,7 +1122,9 @@ export function DocsPreview() {
           </div>
           <DrawerFooter>
             <DrawerClose class={buttonVariants()}>Submit</DrawerClose>
-            <DrawerClose class={buttonVariants({ variant: "outline" })}>Cancel</DrawerClose>
+            <DrawerClose class={buttonVariants({ variant: "outline" })}>
+              Cancel
+            </DrawerClose>
           </DrawerFooter>
         </div>
       </DrawerContent>
@@ -1059,7 +1159,8 @@ const DEMOS: {
     key: "scroll",
     name: "Scrolling content",
     props: "touch-pan-y on the list",
-    blurb: "A list inside the drawer scrolls; the drawer only drags from the top of it.",
+    blurb:
+      "A list inside the drawer scrolls; the drawer only drags from the top of it.",
     demo: Scrollable,
   },
   {
@@ -1073,7 +1174,8 @@ const DEMOS: {
     key: "directions",
     name: "Four edges",
     props: 'direction="top" | "right" | "bottom" | "left"',
-    blurb: "The same gesture from any edge. Side drawers are 75% wide, capped at 24rem.",
+    blurb:
+      "The same gesture from any edge. Side drawers are 75% wide, capped at 24rem.",
     demo: Directions,
   },
   {
@@ -1087,21 +1189,24 @@ const DEMOS: {
     key: "scaled",
     name: "Scaled background",
     props: "shouldScaleBackground",
-    blurb: "The page draws back behind a modal drawer, the way a phone does it.",
+    blurb:
+      "The page draws back behind a modal drawer, the way a phone does it.",
     demo: Scaled,
   },
   {
     key: "resize",
     name: "Resize",
     props: "transitionResize",
-    blurb: "Content that changes height moves the drawer's edge instead of jumping it.",
+    blurb:
+      "Content that changes height moves the drawer's edge instead of jumping it.",
     demo: Resize,
   },
   {
     key: "dynamic",
     name: "Dynamic height",
     props: "transitionResize, and your own classes on Content",
-    blurb: "A floating sheet whose views change; the drawer animates to each view's height.",
+    blurb:
+      "A floating sheet whose views change; the drawer animates to each view's height.",
     demo: Dynamic,
   },
   {
@@ -1115,28 +1220,32 @@ const DEMOS: {
     key: "handleonly",
     name: "Handle only",
     props: "handleOnly",
-    blurb: "Only the handle drags; a slider and a sideways-scrolling row keep their gestures.",
+    blurb:
+      "Only the handle drags; a slider and a sideways-scrolling row keep their gestures.",
     demo: HandleOnly,
   },
   {
     key: "nondismissible",
     name: "Not dismissible",
     props: "dismissible={false}",
-    blurb: "No drag-to-close, Escape or tap-outside; only its own button lets it go.",
+    blurb:
+      "No drag-to-close, Escape or tap-outside; only its own button lets it go.",
     demo: NotDismissible,
   },
   {
     key: "persistent",
     name: "Always visible",
     props: 'snapPoints={["76px", 0.5, 0.92]} dismissible={false} modal={false}',
-    blurb: "A minimum height: the header is the first snap point and a drag below it springs back.",
+    blurb:
+      "A minimum height: the header is the first snap point and a drag below it springs back.",
     demo: Persistent,
   },
   {
     key: "panel",
     name: "Inside a panel",
     props: "container={panel()} modal={false}",
-    blurb: "A drawer that lives in a panel: fractions of its height, portal into it.",
+    blurb:
+      "A drawer that lives in a panel: fractions of its height, portal into it.",
     demo: Panel,
     docsOnly: true,
   },
@@ -1161,8 +1270,12 @@ export function DemoGallery() {
                 {entry.props}
               </code>
             </div>
-            <p class="text-foreground/80 m-0 text-[0.95rem] text-pretty">{entry.blurb}</p>
-            <div class="flex flex-wrap items-center gap-2 md:justify-end">{entry.demo()}</div>
+            <p class="text-foreground/80 m-0 text-[0.95rem] text-pretty">
+              {entry.blurb}
+            </p>
+            <div class="flex flex-wrap items-center gap-2 md:justify-end">
+              {entry.demo()}
+            </div>
           </article>
         )}
       </For>
@@ -1177,7 +1290,11 @@ export function DocsExample(props: { name: string }) {
     <div class="not-prose bg-card/60 flex min-h-[220px] flex-wrap items-center justify-center gap-2 rounded-lg border p-8">
       <Show
         when={entry()}
-        fallback={<p class="text-muted-foreground text-sm">No demo named {props.name}.</p>}
+        fallback={
+          <p class="text-muted-foreground text-sm">
+            No demo named {props.name}.
+          </p>
+        }
       >
         {entry()!.demo()}
       </Show>

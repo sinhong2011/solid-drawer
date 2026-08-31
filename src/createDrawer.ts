@@ -406,6 +406,10 @@ export function createDrawer(
     if (!dismissible() && !snapPoints()) return;
     if (handleOnly() && !fromHandle) return;
     const target = event.target instanceof Element ? event.target : null;
+    // Solid delegates pointer events up the component tree, portals and all,
+    // so a press in a nested drawer's content reaches the drawer it is in.
+    // It is the innermost content's press, and nobody else's.
+    if (target && target.closest("[data-drawer-content]") !== untrack(contentEl)) return;
     if (!fromHandle && !locationIsDraggable(target, untrack(contentEl))) return;
     press = {
       id: event.pointerId,
