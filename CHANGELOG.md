@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/sinhong2011/solid-drawer/compare/v0.1.3...v0.1.4) (2026-08-31)
+
+
+### Bug Fixes
+
+* keep a nested drawer's drag its own, center the hero reopen trigger ([#14](https://github.com/sinhong2011/solid-drawer/issues/14)) ([29f5fa5](https://github.com/sinhong2011/solid-drawer/commit/29f5fa50ffe59f1323196a069fa383f506eca58d))
+
 ## [0.1.3](https://github.com/sinhong2011/solid-drawer/compare/v0.1.2...v0.1.3) (2026-08-30)
 
 
